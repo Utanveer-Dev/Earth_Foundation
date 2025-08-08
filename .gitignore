@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.env
+faiss_index/
+node_modules/
+.vscode/
+.DS_Store
