@@ -13,6 +13,7 @@ from langchain.embeddings import HuggingFaceEmbeddings
 from langchain import PromptTemplate, LLMChain
 import os
 
+
 class CustomOutputParser(StrOutputParser):
     def parse(self, response: str):
         return response.split('[/INST]')[-1]
