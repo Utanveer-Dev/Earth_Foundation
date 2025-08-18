@@ -38,7 +38,7 @@ class StoryCreativityAPIView(APIView):
         # Build state for LangGraph 
         state = {
             "index": index,
-            "question": q,
+            "question": q, 
             "needs_retrieval": False,
             "answer": None,
             "name": name,
