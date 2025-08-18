@@ -1,1 +1,0 @@
-My name is Wasif. I'm currently an AI Engineer. I'm working on publishing RAG python package on PyPI for our organization. My hobby is to do coding, play cricket, table tennis, and video games like GTA 5 which is my favourite.
