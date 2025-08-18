@@ -35,7 +35,7 @@ class StoryCreativityAPIView(APIView):
         else:
             name = email = country = representation = state = role = None
 
-        # Build state for LangGraph
+        # Build state for LangGraph 
         state = {
             "index": index,
             "question": q,
