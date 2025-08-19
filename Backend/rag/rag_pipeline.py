@@ -77,9 +77,9 @@ class StoryCreativityChain:
             print("Loading FAISS index from disk...")
             self.db = FAISS.load_local(faiss_path, HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2"), allow_dangerous_deserialization=True)
         else:
-            print("Building new FAISS index...")
-            self.db = self.build_faiss_index()
-            self.db.save_local(faiss_path)  # saving index to disk for future use
+            print("FAISS index not present")
+            # self.db = self.build_faiss_index()
+            # self.db.save_local(faiss_path)  # saving index to disk for future use
 
         self.retriever = self.db.as_retriever()
 
@@ -124,23 +124,23 @@ class StoryCreativityChain:
         return prompt
 
 
-    def build_faiss_index(self, model_name="sentence-transformers/all-MiniLM-L6-v2"):
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        file_path = os.path.join(current_dir, "data.txt")
+    # def build_faiss_index(self, model_name="sentence-transformers/all-MiniLM-L6-v2"):
+    #     current_dir = os.path.dirname(os.path.abspath(__file__))
+    #     file_path = os.path.join(current_dir, "data.txt")
 
-        print("file path:", file_path)
+    #     print("file path:", file_path)
 
-        loader = TextLoader(file_path)
-        documents = loader.load()
+    #     loader = TextLoader(file_path)
+    #     documents = loader.load()
 
-        embeddings = HuggingFaceEmbeddings(model_name=model_name)
+    #     embeddings = HuggingFaceEmbeddings(model_name=model_name)
 
-        # from langchain.text_splitter import CharacterTextSplitter
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=10, chunk_overlap=0, separator=".")
-        texts = text_splitter.split_documents(documents)
+    #     # from langchain.text_splitter import CharacterTextSplitter
+    #     text_splitter = RecursiveCharacterTextSplitter(chunk_size=10, chunk_overlap=0, separator=".")
+    #     texts = text_splitter.split_documents(documents)
 
-        db = FAISS.from_documents(texts, embeddings)
-        return db
+    #     db = FAISS.from_documents(texts, embeddings)
+    #     return db
 
     def getNewChain(self):
         prompt = self.getPromptFromTemplate(0)
@@ -164,36 +164,6 @@ class StoryCreativityChain:
         #     )
         
         return rag_chain, llm_chain
-    
-    
-#     def create_gating_chain(self, input):
-#         gating_prompt = f"""
-# Decide whether the following user query requires retrieving external documents to answer it. Retrieving external documents is required if user asks anything (e.g information, etc.).
-# Return only "YES" if user asks anything and "NO" if it's a simple greeting.
-
-# Query:
-# {input}
-# """
-        
-#         import google.generativeai as genai
-#         genai.configure(api_key = "AIzaSyANj4bwTAp1cCRf6m5xiZGlVfxZtZx365Q")
-        
-#         model = genai.GenerativeModel(
-#                 model_name='gemini-2.0-flash'
-#             )
-
-#         llm_output = model.generate_content(
-#                         gating_prompt,
-#                         generation_config={
-#                                 "temperature": 0.1,
-#                                 "max_output_tokens": 1000,
-#                                 "top_p": 0.8,
-#                                 "top_k": 40
-#                         }
-#                     )
-
-        
-#         return llm_output.text
 
 
     def create_gating_chain(self):
@@ -226,54 +196,3 @@ Standalone question:
 """
         )
         return LLMChain(prompt=reformulate_prompt, llm=self.llm, output_parser=StrOutputParser())
-
-
-    # def ask(self, question, chain, llm_chain):
-    #     # 1. Create gating chain and decide if retrieval is needed
-    #     # gating_chain = self.create_gating_chain()
-    #     # decision = gating_chain.invoke({"input": question})
-    #     # decision_text = decision.get('text', '').strip().upper()
-        
-    #     decision_text = self.create_gating_chain(question)
-
-    #     # 2. Load chat history from memory of the chain inside getNewChain
-    #     memory = ConversationBufferMemory(input_key="question", memory_key="history", max_len=5)
-    #     chat_history = memory.load_memory_variables({}).get("history", [])
-    #     history_text = "\n".join(chat_history) if chat_history else ""
-
-    #     print("Hello1")
-    #     print("decision_text:", decision_text.startswith("Y"))
-
-    #     # 3. If retrieval needed, reformulate question
-    #     if decision_text.startswith("Y"):
-    #         reformulate_chain = self.create_reformulation_chain()
-    #         get_question = reformulate_chain.invoke({"history": history_text, "input": question})
-    #         standalone_question = get_question.get('text', '').strip()
-    #         print("Hello2")
-            
-    #         # Retrieve relevant docs based on standalone question
-    #         docs = self.retriever.get_relevant_documents(standalone_question)
-    #         context = "\n\n".join([doc.page_content for doc in docs])
-    #     else:
-    #         standalone_question = question
-    #         context = ""
-        
-    #         rag_chain = (
-    #             {"context": RunnablePassthrough(), "question": RunnablePassthrough()}
-    #             | llm_chain
-    #         )
-            
-    #         response = rag_chain.invoke(standalone_question)
-            
-    #         return response.get('text', '').strip()
-            
-
-    #     # 4. Use your existing chain to generate answer with memory internally
-    #     response = chain.invoke(standalone_question)
-
-    #     return response.get('text', '').strip()
-
-
-# story_chain = StoryCreativityChain()
-# chain, llm_chain = story_chain.getNewChain()
-# chain = story_chain.getNewChain()
