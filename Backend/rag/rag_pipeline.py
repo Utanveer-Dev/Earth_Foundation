@@ -244,7 +244,7 @@ class StoryCreativityChain:
 
 
     def getNewChain(self):
-        prompt = PromptTemplate(template="")
+        prompt = self.getPromptFromTemplate(0, ADULT_FLOW)
         # prompt = ""
         memory = ConversationBufferMemory(input_key="question", memory_key="history", max_len=5)
         llm_chain = LLMChain(prompt=prompt, llm=self.llm, verbose=True, memory=memory,
