@@ -11,6 +11,13 @@ class Customer(models.Model):
     email = models.CharField(max_length=100, blank=True, null=True) 
     country = models.CharField(max_length=100, blank=True, null=True) 
     representation = models.TextField(blank=True, null=True) 
+    
+    education_setting = models.CharField(max_length=100, blank=True, null=True)
+    subjects = models.CharField(max_length=100, blank=True, null=True)
+    age_group = models.CharField(max_length=100, blank=True, null=True) 
+    initiative = models.CharField(max_length=100, blank=True, null=True)
+    worked_before = models.CharField(max_length=10, blank=True, null=True)
+    
     state = models.IntegerField(default=0) 
     role = models.CharField(max_length=20, choices=ROLE_CHOICES) 
     

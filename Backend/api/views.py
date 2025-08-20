@@ -13,13 +13,15 @@ class StoryCreativityAPIView(APIView):
     user_indices = {}
 
     def post(self, request):
-        user_id = 5  
+        user_id = 6  
         q = request.data.get("question", "").strip()
         if not q:
             return Response({"error": "No question provided"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Get current index for this user, default 0
         index = self.user_indices.get(user_id, 0)
+
+        # "education_setting", "subjects", "age_group", "initiative", "worked_before"
 
         # Fetch existing customer from DB (if exists)
         customer = Customer.objects.filter(id=user_id).first()  # replace with dynamic lookup if needed
@@ -30,23 +32,49 @@ class StoryCreativityAPIView(APIView):
             email = customer.email
             country = customer.country
             representation = customer.representation
+            subjects = customer.subjects
+            age_group = customer.age_group
+            initiative = customer.initiative
+            worked_before = customer.worked_before
             state = customer.state
             role = customer.role
         else:
-            name = email = country = representation = state = role = None
+            name = email = country = representation = state = role = education_setting = subjects = age_group = initiative = worked_before = None
 
-        # Build state for LangGraph 
-        state = {
-            "index": index,
-            "question": q, 
-            "needs_retrieval": False,
-            "answer": None,
-            "name": name,
-            "email": email,
-            "country": country,
-            "representation": representation,
-            "role": "adult",
-        }
+        role = request.data.get("role", "").strip().lower()
+
+        if role == "adult":
+
+            # Build state for LangGraph 
+            state = {
+                "index": index,
+                "question": q, 
+                "needs_retrieval": False,
+                "answer": None,
+                "name": name,
+                "email": email,
+                "country": country,
+                "representation": representation,
+                "role": role
+            }
+            
+        elif role == "educator":
+
+            # Build state for LangGraph 
+            state = {
+                "index": index,
+                "question": q, 
+                "needs_retrieval": False,
+                "answer": None,
+                "name": name,
+                "email": email,
+                "country": country,
+                "subjects": subjects,
+                "age_group": age_group,
+                "initiative": initiative,
+                "worked_before": worked_before,
+                "role": role
+            }
 
         try:
             # Run LangGraph
@@ -61,6 +89,10 @@ class StoryCreativityAPIView(APIView):
                 "email": updated_state.get("email", email),
                 "country": updated_state.get("country", country),
                 "representation": updated_state.get("representation", representation),
+                "subjects": updated_state.get("subjects", subjects),
+                "age_group": updated_state.get("age_group", age_group),
+                "initiative": updated_state.get("initiative", initiative),
+                "worked_before": updated_state.get("worked_before", worked_before),
                 "state": updated_state.get("index", index)-1,
                 "role": updated_state.get("role", role),
             }

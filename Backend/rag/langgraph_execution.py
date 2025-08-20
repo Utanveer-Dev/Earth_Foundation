@@ -6,6 +6,7 @@ from langchain_core.prompts import PromptTemplate
 from langchain.chains import LLMChain
 from typing import Optional, TypedDict
 from role_states.adult_states import ADULT_FLOW
+from role_states.educator_states import EDUCATOR_FLOW
 import asyncio
 import re, json
 
@@ -26,6 +27,7 @@ class StoryState(TypedDict):
 
 # Instantiating chain class once
 story_chain = StoryCreativityChain()
+
 main_chain, llm_chain = story_chain.getNewChain()
 
 retriever = story_chain.get_retriever()
@@ -50,6 +52,13 @@ def gating_node(state: StoryState):
 
     print("Decision text:", decision_text.startswith("Y"))
 
+    # if state["role"] == "adult":
+    #     main_chain, llm_chain = story_chain.getNewChain(ADULT_FLOW)
+    # elif state["role"] == "educator":
+    #     main_chain, llm_chain = story_chain.getNewChain(EDUCATOR_FLOW)
+    # elif state["role"] == "teenager":
+        # main_chain, llm_chain = story_chain.getNewChain()
+
     if decision_text.startswith("Y"):
         # reformulate_chain = story_chain.create_reformulation_chain()
         # get_question = reformulate_chain.invoke({"history": history_text, "input": state["question"]})
@@ -62,87 +71,212 @@ def gating_node(state: StoryState):
         return {"question": state["question"], "context": "", "needs_retrieval": False}
 
 
-def extract_data_from_index(state: StoryState, response_text: str):
+def extract_data_from_index(state: StoryState):
     
-    match = re.search(r'\{.*\}', response_text, re.DOTALL)
-    if match:
-        try:
-            data = json.loads(match.group(0))
+    #-------------------------------------------------------- ADULT ROLE EXTRACTION ------------------------------
+    if state["role"] == "adult":
+    
+        if state["index"] == 1 or state["index"] == 3 or state["index"] == 5 or state["index"] == 7:
+            
+            ADULT_FLOW_LIST = list(ADULT_FLOW.values())
+            
+            system_instruction, prompt = story_chain.get_flow_step(state["index"], ADULT_FLOW_LIST)
+            
+            B_INST, E_INST = "[INST]", "[/INST]"
+            B_SYS, E_SYS = "<<SYS>>\n", "\n<</SYS>>\n\n"
+            
+            SYSTEM_PROMPT = B_SYS + system_instruction + '\n' + prompt + E_SYS
+            
+            instruction = """
+            User: {question}"""
 
-            if state["index"] == 1 and "Name" in data:
-                state["name"] = data["Name"]
+            prompt_template = B_INST + SYSTEM_PROMPT + instruction + E_INST
+            
+            final_prompt = PromptTemplate(input_variables=["question"], template=prompt_template)
+            
+            llm_chain_extract = LLMChain(prompt=final_prompt, llm=llm_extract)
+            
+            response = llm_chain_extract.invoke(state["question"])
+            
+            response_text = response.get("text", "").strip()
+        
+            match = re.search(r'\{.*\}', response_text, re.DOTALL)
+            if match:
+                try:
+                    data = json.loads(match.group(0))
 
-            elif state["index"] == 3 and "Email" in data:
-                state["email"] = data["Email"]
+                    if state["index"] == 1 and "Name" in data:
+                        state["name"] = data["Name"]
+                        state["index"] += 1
 
-            elif state["index"] == 5 and "Country" in data:
-                state["country"] = data["Country"]
+                    elif state["index"] == 3 and "Email" in data:
+                        state["email"] = data["Email"]
+                        state["index"] += 1
 
-            elif state["index"] == 7 and "Representation" in data:
-                state["representation"] = data["Representation"]
+                    elif state["index"] == 5 and "Country" in data:
+                        state["country"] = data["Country"]
+                        state["index"] += 1
 
-            # elif state["index"] == 9 and "Interest" in data:
-            #     state["interest"] = data["Interest"]
+                    elif state["index"] == 7 and "Representation" in data:
+                        state["representation"] = data["Representation"]
+                        state["index"] += 1
 
-        except json.JSONDecodeError:
-            pass  # If model returns non-JSON, skip
+                except json.JSONDecodeError:
+                    pass  # If model returns non-JSON, skip
 
+            return state
+        
+        return state
+    
+    #-------------------------------------------------------- EDUCATOR ROLE EXTRACTION ------------------------------
+    if state["role"] == "educator":
+    
+        if state["index"] == 1 or state["index"] == 3 or state["index"] == 5 or state["index"] == 7 or state["index"] == 9 or state["index"] == 11 or state["index"] == 13 or state["index"] == 15:
+            
+            EDUCATOR_FLOW_LIST = list(EDUCATOR_FLOW.values())
+            
+            system_instruction, prompt = story_chain.get_flow_step(state["index"], EDUCATOR_FLOW_LIST)
+            
+            B_INST, E_INST = "[INST]", "[/INST]"
+            B_SYS, E_SYS = "<<SYS>>\n", "\n<</SYS>>\n\n"
+            
+            SYSTEM_PROMPT = B_SYS + system_instruction + '\n' + prompt + E_SYS
+            
+            instruction = """
+            User: {question}"""
+
+            prompt_template = B_INST + SYSTEM_PROMPT + instruction + E_INST
+            
+            final_prompt = PromptTemplate(input_variables=["question"], template=prompt_template)
+            
+            llm_chain_extract = LLMChain(prompt=final_prompt, llm=llm_extract)
+            
+            response = llm_chain_extract.invoke(state["question"])
+            
+            response_text = response.get("text", "").strip()
+        
+            match = re.search(r'\{.*\}', response_text, re.DOTALL)
+            if match:
+                try:
+                    data = json.loads(match.group(0))
+
+                    if state["index"] == 1 and "Name" in data:
+                        state["name"] = data["Name"]
+                        state["index"] += 1
+
+                    elif state["index"] == 3 and "Email" in data:
+                        state["email"] = data["Email"]
+                        state["index"] += 1
+
+                    elif state["index"] == 5 and "Country" in data:
+                        state["country"] = data["Country"]
+                        state["index"] += 1
+
+                    elif state["index"] == 7 and "Education_setting" in data:
+                        state["education_setting"] = data["Education_setting"]
+                        state["index"] += 1
+                        
+                    elif state["index"] == 9 and "Subject(s)" in data:
+                        state["subjects"] = data["Subject(s)"]
+                        state["index"] += 1
+                        
+                    elif state["index"] == 11 and "Age_group" in data:
+                        state["age_group"] = data["Age_group"]
+                        state["index"] += 1
+                        
+                    elif state["index"] == 13 and "Initiatives" in data:
+                        state["initiative"] = data["Initiatives"]
+                        state["index"] += 1
+                        
+                    elif state["index"] == 15 and "Involvment_before" in data:
+                        state["worked_before"] = data["Involvment_before"]
+                        state["index"] += 1
+
+                except json.JSONDecodeError:
+                    pass  # If model returns non-JSON, skip
+
+            return state
+        
+        return state
+    
     return state
-
 
 
 # Node 2: Run without retrieval
 def llm_no_retrieval(state: StoryState):
-   
-    if state["index"] == 1 or state["index"] == 3 or state["index"] == 5 or state["index"] == 7:
+
+    state = extract_data_from_index(state)
+    
+    if state["role"] == "adult":
+        prompt = story_chain.getPromptFromTemplate(state["index"], ADULT_FLOW)
+    elif state["role"] == "educator" and state["index"] != 6:
+        prompt = story_chain.getPromptFromTemplate(state["index"], EDUCATOR_FLOW)
+    # elif state["role"] == "teenager":
+    #     main_chain, llm_chain = story_chain.getNewChain()
+    
+    if state["role"] == "educator" and state["index"] == 6: 
+        # Convert to indexed list
+        EDUCATOR_FLOW_LIST = list(EDUCATOR_FLOW.values())
+
+        system_instruction, prompt = story_chain.get_flow_step(state["index"], EDUCATOR_FLOW_LIST)
         
-        ADULT_FLOW_LIST = list(ADULT_FLOW.values())
-        
-        system_instruction, prompt = story_chain.get_flow_step(state["index"], ADULT_FLOW_LIST)
+        # system_prompt = "Instruction: " + instruction + "\n" + prompt
         
         B_INST, E_INST = "[INST]", "[/INST]"
         B_SYS, E_SYS = "<<SYS>>\n", "\n<</SYS>>\n\n"
-        
-        SYSTEM_PROMPT = B_SYS + system_instruction + '\n' + prompt + E_SYS
-        
+        SYSTEM_PROMPT1 = B_SYS + system_instruction + '\n' + prompt + E_SYS
+
         instruction = """
+        History: {history} \n
+        Context: {context} \n
         User: {question}"""
 
-        prompt_template = B_INST + SYSTEM_PROMPT + instruction + E_INST
+        prompt_template = B_INST + SYSTEM_PROMPT1 + instruction + E_INST
         
-        final_prompt = PromptTemplate(input_variables=["question"], template=prompt_template)
+        # prompt_template = system_prompt + instruction
         
-        llm_chain_extract = LLMChain(prompt=final_prompt, llm=llm_extract)
-        
-        response = llm_chain_extract.invoke(state["question"])
+        prompt = PromptTemplate(input_variables=["country", "history", "question", "context"], template=prompt_template)
+    
+        llm_chain.prompt = prompt
+
+        temp_chain = (
+            {"country": state["country"], "context": RunnablePassthrough(), "question": RunnablePassthrough()}
+            | llm_chain
+        )
+
+        response = temp_chain.invoke(state["question"])
         
         text_response = response.get("text", "").strip()
 
-        state = extract_data_from_index(state, text_response)
+        # Store plain answer
+        state["answer"] = text_response    
 
-        state["index"] += 1
+        print("")
+        print("State:  ", state)
+        print("")
         
-    prompt = story_chain.getPromptFromTemplate(state["index"])
+        state["index"] += 1
     
-    llm_chain.prompt = prompt
+    else:
+        llm_chain.prompt = prompt
 
-    temp_chain = (
-        {"context": RunnablePassthrough(), "question": RunnablePassthrough()}
-        | llm_chain
-    )
+        temp_chain = (
+            {"context": RunnablePassthrough(), "question": RunnablePassthrough()}
+            | llm_chain
+        )
 
-    response = temp_chain.invoke(state["question"])
-    
-    text_response = response.get("text", "").strip()
+        response = temp_chain.invoke(state["question"])
+        
+        text_response = response.get("text", "").strip()
 
-    # Store plain answer
-    state["answer"] = text_response    
+        # Store plain answer
+        state["answer"] = text_response    
 
-    print("")
-    print("State:  ", state)
-    print("")
-    
-    state["index"] += 1  # Increment index for next state
+        print("")
+        print("State:  ", state)
+        print("")
+        
+        state["index"] += 1  # Increment index for next state
 
     return state
 
@@ -150,35 +284,12 @@ def llm_no_retrieval(state: StoryState):
 # Node 3: Run with retrieval
 def llm_with_retrieval(state: StoryState):
     
-    if state["index"] == 1 or state["index"] == 3 or state["index"] == 5 or state["index"] == 7:
+    state = extract_data_from_index(state)
         
-        ADULT_FLOW_LIST = list(ADULT_FLOW.values())
-        
-        system_instruction, prompt = story_chain.get_flow_step(state["index"], ADULT_FLOW_LIST)
-        
-        B_INST, E_INST = "[INST]", "[/INST]"
-        B_SYS, E_SYS = "<<SYS>>\n", "\n<</SYS>>\n\n"
-        
-        SYSTEM_PROMPT = B_SYS + system_instruction + '\n' + prompt + E_SYS
-        
-        instruction = """
-        User: {question}"""
-
-        prompt_template = B_INST + SYSTEM_PROMPT + instruction + E_INST
-        
-        final_prompt = PromptTemplate(input_variables=["question"], template=prompt_template)
-        
-        llm_chain_extract = LLMChain(prompt=final_prompt, llm=llm_extract)
-        
-        response = llm_chain_extract.invoke(state["question"])
-        
-        text_response = response.get("text", "").strip()
-
-        state = extract_data_from_index(state, text_response)
-
-        state["index"] += 1
-        
-    prompt = story_chain.getPromptFromTemplate(state["index"])
+    if state["role"] == "adult":
+        prompt = story_chain.getPromptFromTemplate(state["index"], ADULT_FLOW)
+    elif state["role"] == "educator":
+        prompt = story_chain.getPromptFromTemplate(state["index"], EDUCATOR_FLOW)
     
     llm_chain.prompt = prompt
     

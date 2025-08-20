@@ -21,6 +21,7 @@ from typing import Annotated
 from langchain_core.runnables import Runnable
 
 from role_states.adult_states import ADULT_FLOW
+from role_states.educator_states import EDUCATOR_FLOW
 
 from google import genai
 
@@ -78,8 +79,8 @@ class StoryCreativityChain:
             self.db = FAISS.load_local(faiss_path, HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2"), allow_dangerous_deserialization=True)
         else:
             print("FAISS index not present")
-            # self.db = self.build_faiss_index()
-            # self.db.save_local(faiss_path)  # saving index to disk for future use
+            self.db = self.build_faiss_index()
+            self.db.save_local(faiss_path)  # saving index to disk for future use
 
         self.retriever = self.db.as_retriever()
 
@@ -88,21 +89,21 @@ class StoryCreativityChain:
         return self.retriever
 
 
-    def get_flow_step(self, index: int, ADULT_FLOW_LIST):
+    def get_flow_step(self, index: int, FLOW_LIST):
         """Return the prompt and system instruction for a given index."""
-        if 0 <= index < len(ADULT_FLOW_LIST):
-            step = ADULT_FLOW_LIST[index]
+        if 0 <= index < len(FLOW_LIST):
+            step = FLOW_LIST[index]
             return step["system_instruction"], step["prompt"]
         else:
             raise IndexError("Invalid step index")
 
 
-    def getPromptFromTemplate(self, index):
+    def getPromptFromTemplate(self, index, flow_states):
         
         # Convert to indexed list
-        ADULT_FLOW_LIST = list(ADULT_FLOW.values())
+        FLOW_LIST = list(flow_states.values())
 
-        system_instruction, prompt = self.get_flow_step(index, ADULT_FLOW_LIST)
+        system_instruction, prompt = self.get_flow_step(index, FLOW_LIST)
         
         # system_prompt = "Instruction: " + instruction + "\n" + prompt
         
@@ -124,26 +125,28 @@ class StoryCreativityChain:
         return prompt
 
 
-    # def build_faiss_index(self, model_name="sentence-transformers/all-MiniLM-L6-v2"):
-    #     current_dir = os.path.dirname(os.path.abspath(__file__))
-    #     file_path = os.path.join(current_dir, "data.txt")
+    def build_faiss_index(self, model_name="sentence-transformers/all-MiniLM-L6-v2"):
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        file_path = os.path.join(current_dir, "dummy_data.txt")
 
-    #     print("file path:", file_path)
+        print("file path:", file_path)
 
-    #     loader = TextLoader(file_path)
-    #     documents = loader.load()
+        loader = TextLoader(file_path)
+        documents = loader.load()
 
-    #     embeddings = HuggingFaceEmbeddings(model_name=model_name)
+        embeddings = HuggingFaceEmbeddings(model_name=model_name)
 
-    #     # from langchain.text_splitter import CharacterTextSplitter
-    #     text_splitter = RecursiveCharacterTextSplitter(chunk_size=10, chunk_overlap=0, separator=".")
-    #     texts = text_splitter.split_documents(documents)
+        # from langchain.text_splitter import CharacterTextSplitter
+        text_splitter = RecursiveCharacterTextSplitter(chunk_size=10, chunk_overlap=0, separators=["."])
+        texts = text_splitter.split_documents(documents)
 
-    #     db = FAISS.from_documents(texts, embeddings)
-    #     return db
+        db = FAISS.from_documents(texts, embeddings)
+        return db
+
 
     def getNewChain(self):
-        prompt = self.getPromptFromTemplate(0)
+        # prompt = self.getPromptFromTemplate(0, flow_states)
+        prompt = ""
         memory = ConversationBufferMemory(input_key="question", memory_key="history", max_len=5)
         llm_chain = LLMChain(prompt=prompt, llm=self.llm, verbose=True, memory=memory,
                              output_parser=CustomOutputParser())

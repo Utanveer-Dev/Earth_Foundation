@@ -2,6 +2,7 @@
 import { useState, FormEvent } from "react";
 
 export default function Home() {
+  const [role, setRole] = useState<string>("Teenager");
   const [question, setQuestion] = useState<string>("");
   const [answer, setAnswer] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -17,7 +18,7 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ question }),
+        body: JSON.stringify({ role, question }),
       });
 
       const data = await res.json();
@@ -36,6 +37,20 @@ export default function Home() {
     <main style={{ padding: "2rem", fontFamily: "sans-serif" }}>
       <h1>Ask the Story Creativity Chain</h1>
       <form onSubmit={handleAsk} style={{ marginBottom: "1rem" }}>
+        {/* Role Selector */}
+        <label style={{ marginRight: "0.5rem" }}>Select Role:</label>
+        <select
+          value={role}
+          onChange={(e) => setRole(e.target.value)}
+          style={{ marginBottom: "1rem", padding: "0.3rem" }}
+        >
+          <option value="Teenager">Teenager</option>
+          <option value="Educator">Educator</option>
+          <option value="Adult">Adult</option>
+        </select>
+        <br />
+
+        {/* Question Box */}
         <textarea
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
@@ -45,6 +60,7 @@ export default function Home() {
           style={{ padding: "0.5rem" }}
         />
         <br />
+
         <button
           type="submit"
           style={{

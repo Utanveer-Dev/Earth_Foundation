@@ -4,7 +4,7 @@ from .models import Customer
 class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
-        fields = ["id", "name", "email", "country", "representation", "state", "role", "created_at"]
+        fields = ["id", "name", "email", "country", "representation", "education_setting", "subjects", "age_group", "initiative", "worked_before", "state", "role", "created_at"]
 
     # Make fields optional for step-by-step saving
     # name = serializers.CharField(required=False, allow_blank=True, allow_null=True)
