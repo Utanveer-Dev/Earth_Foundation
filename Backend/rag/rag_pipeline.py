@@ -179,7 +179,7 @@ class StoryCreativityChain:
         retriever = self.db.as_retriever(search_type="similarity", search_kwargs=kwargs)
 
         docs = retriever.get_relevant_documents(query)
-
+ 
         # fallback: if nothing found with filter, drop the filter
         if not docs and filter_kwargs:
             retriever = self.db.as_retriever(search_type="similarity",
