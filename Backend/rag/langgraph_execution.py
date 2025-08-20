@@ -21,6 +21,11 @@ class StoryState(TypedDict):
     email: Optional[str]
     country: Optional[str]
     representation: Optional[str]
+    education_setting: Optional[str]
+    subjects: Optional[str]
+    age_group: Optional[str]
+    initiative: Optional[str]
+    worked_before: Optional[str]
     role: Optional[str]
     # interest: Optional[str]
     
@@ -30,7 +35,7 @@ story_chain = StoryCreativityChain()
 
 main_chain, llm_chain = story_chain.getNewChain()
 
-retriever = story_chain.get_retriever()
+retriever = story_chain.get_retriever_simple()
 
 llm_extract = story_chain.llm
 
@@ -214,6 +219,7 @@ def llm_no_retrieval(state: StoryState):
     # elif state["role"] == "teenager":
     #     main_chain, llm_chain = story_chain.getNewChain()
     
+    
     if state["role"] == "educator" and state["index"] == 6: 
         # Convert to indexed list
         EDUCATOR_FLOW_LIST = list(EDUCATOR_FLOW.values())
@@ -239,8 +245,58 @@ def llm_no_retrieval(state: StoryState):
     
         llm_chain.prompt = prompt
 
+        temp_retriever = story_chain.get_retriever(state["question"])
+
         temp_chain = (
-            {"country": state["country"], "context": RunnablePassthrough(), "question": RunnablePassthrough()}
+            {"country": lambda _: state["country"], "context": temp_retriever, "question": RunnablePassthrough()}
+            | llm_chain
+        )
+
+        response = temp_chain.invoke(state["question"])
+        
+        text_response = response.get("text", "").strip()
+
+        # Store plain answer
+        state["answer"] = text_response    
+
+        print("")
+        print("State:  ", state)
+        print("")
+        
+        state["index"] += 1
+        
+    elif state["role"] == "educator" and state["index"] == 16 and state["worked_before"] == "NO" or state["worked_before"] == "No" or state["worked_before"] == "no": 
+    
+        llm_chain.prompt = prompt
+
+        temp_chain = (
+            {"context": RunnablePassthrough(), "question": RunnablePassthrough()}
+            | llm_chain
+        )
+
+        response = temp_chain.invoke(state["question"])
+        
+        text_response = response.get("text", "").strip()
+
+        # Store plain answer
+        state["answer"] = text_response    
+
+        print("")
+        print("State:  ", state)
+        print("")
+        
+        state["index"] += 2
+    
+    elif state["role"] == "educator" and state["index"] == 16 and state["worked_before"] == "YES" or state["worked_before"] == "Yes" or state["worked_before"] == "yes": 
+        
+        state["index"] += 1
+        
+        prompt = story_chain.getPromptFromTemplate(state["index"], EDUCATOR_FLOW)
+        
+        llm_chain.prompt = prompt
+
+        temp_chain = (
+            {"context": RunnablePassthrough(), "question": RunnablePassthrough()}
             | llm_chain
         )
 
@@ -291,25 +347,123 @@ def llm_with_retrieval(state: StoryState):
     elif state["role"] == "educator":
         prompt = story_chain.getPromptFromTemplate(state["index"], EDUCATOR_FLOW)
     
-    llm_chain.prompt = prompt
-    
-    main_chain = (
-        {"context": retriever, "question": RunnablePassthrough()}
-        | llm_chain
-    )
+    if state["role"] == "educator" and state["index"] == 6: 
+        # Convert to indexed list
+        EDUCATOR_FLOW_LIST = list(EDUCATOR_FLOW.values())
 
-    response = main_chain.invoke(state["question"])
-    
-    text_response = response.get("text", "").strip()
+        system_instruction, prompt = story_chain.get_flow_step(state["index"], EDUCATOR_FLOW_LIST)
+        
+        # system_prompt = "Instruction: " + instruction + "\n" + prompt
+        
+        B_INST, E_INST = "[INST]", "[/INST]"
+        B_SYS, E_SYS = "<<SYS>>\n", "\n<</SYS>>\n\n"
+        SYSTEM_PROMPT1 = B_SYS + system_instruction + '\n' + prompt + E_SYS
 
-    # Store plain answer
-    state["answer"] = text_response    
+        instruction = """
+        History: {history} \n
+        Context: {context} \n
+        User: {question}"""
 
-    print("")
-    print("State:  ", state)
-    print("")
+        prompt_template = B_INST + SYSTEM_PROMPT1 + instruction + E_INST
+        
+        # prompt_template = system_prompt + instruction
+        
+        prompt = PromptTemplate(input_variables=["country", "history", "question", "context"], template=prompt_template)
     
-    state["index"] += 1
+        llm_chain.prompt = prompt
+
+        temp_retriever = story_chain.get_retriever(state["question"])
+
+        temp_chain = (
+            {"country": lambda _: state["country"], "context": temp_retriever, "question": RunnablePassthrough()}
+            | llm_chain
+        )
+
+        response = temp_chain.invoke(state["question"])
+        
+        text_response = response.get("text", "").strip()
+
+        # Store plain answer
+        state["answer"] = text_response    
+
+        print("")
+        print("State:  ", state)
+        print("")
+        
+        state["index"] += 1
+        
+    elif state["role"] == "educator" and state["index"] == 16 and state["worked_before"] == "NO" or state["worked_before"] == "No" or state["worked_before"] == "no": 
+    
+        llm_chain.prompt = prompt
+
+        temp_chain = (
+            {"context": retriever, "question": RunnablePassthrough()}
+            | llm_chain
+        )
+
+        response = temp_chain.invoke(state["question"])
+        
+        text_response = response.get("text", "").strip()
+
+        # Store plain answer
+        state["answer"] = text_response    
+
+        print("")
+        print("State:  ", state)
+        print("")
+        
+        state["index"] += 2
+    
+    elif state["role"] == "educator" and state["index"] == 16 and state["worked_before"] == "YES" or state["worked_before"] == "Yes" or state["worked_before"] == "yes": 
+        
+        state["index"] += 1
+        
+        prompt = story_chain.getPromptFromTemplate(state["index"], EDUCATOR_FLOW)
+        
+        llm_chain.prompt = prompt
+
+        temp_chain = (
+            {"context": retriever, "question": RunnablePassthrough()}
+            | llm_chain
+        )
+
+        response = temp_chain.invoke(state["question"])
+        
+        text_response = response.get("text", "").strip()
+
+        # Store plain answer
+        state["answer"] = text_response    
+
+        print("")
+        print("State:  ", state)
+        print("")
+        
+        state["index"] += 1
+    
+    else:
+        llm_chain.prompt = prompt
+        
+        print("")
+        print("Education Setting-----------------")
+        print("")
+        
+        main_chain = (
+            {"context": retriever, "question": RunnablePassthrough()}
+            | llm_chain
+        )
+
+        response = main_chain.invoke(state["question"])
+        
+        text_response = response.get("text", "").strip()
+
+        # Store plain answer
+        state["answer"] = text_response    
+
+        print("")
+        print("State:  ", state)
+        print("")
+        
+        state["index"] += 1
 
     return state
 

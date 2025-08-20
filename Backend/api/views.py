@@ -13,7 +13,7 @@ class StoryCreativityAPIView(APIView):
     user_indices = {}
 
     def post(self, request):
-        user_id = 6  
+        user_id = 11  
         q = request.data.get("question", "").strip()
         if not q:
             return Response({"error": "No question provided"}, status=status.HTTP_400_BAD_REQUEST)
@@ -32,6 +32,7 @@ class StoryCreativityAPIView(APIView):
             email = customer.email
             country = customer.country
             representation = customer.representation
+            education_setting = customer.education_setting
             subjects = customer.subjects
             age_group = customer.age_group
             initiative = customer.initiative
@@ -69,6 +70,7 @@ class StoryCreativityAPIView(APIView):
                 "name": name,
                 "email": email,
                 "country": country,
+                "education_setting": education_setting,
                 "subjects": subjects,
                 "age_group": age_group,
                 "initiative": initiative,
@@ -89,6 +91,7 @@ class StoryCreativityAPIView(APIView):
                 "email": updated_state.get("email", email),
                 "country": updated_state.get("country", country),
                 "representation": updated_state.get("representation", representation),
+                "education_setting": updated_state.get("education_setting", education_setting),
                 "subjects": updated_state.get("subjects", subjects),
                 "age_group": updated_state.get("age_group", age_group),
                 "initiative": updated_state.get("initiative", initiative),

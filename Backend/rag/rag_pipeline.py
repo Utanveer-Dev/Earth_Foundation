@@ -23,7 +23,11 @@ from langchain_core.runnables import Runnable
 from role_states.adult_states import ADULT_FLOW
 from role_states.educator_states import EDUCATOR_FLOW
 
-from google import genai
+import google.generativeai as genai
+
+from .data_processor import SchoolDataProcessor
+import json
+import re
 
 
 class CustomOutputParser(StrOutputParser):
@@ -58,20 +62,17 @@ class StoryCreativityChain:
         
         self.llm = ChatGoogleGenerativeAI(
             model="gemini-2.0-flash", 
-            google_api_key="AIzaSyANj4bwTAp1cCRf6m5xiZGlVfxZtZx365Q",
+            google_api_key="AIzaSyCpOdJgQIiE9wlgafM4FKV1WhydtTn58eI",
             temperature=0.7,
             top_k=40,
             top_p=0.95,
             max_output_tokens=512
         )
        
+        name = "faiss_index"
+        
         current_dir = os.path.dirname(os.path.abspath(__file__))
-
-        # Go up one level to the parent folder
-        parent_dir = os.path.dirname(current_dir)
-
-        # Path to faiss_index folder
-        faiss_path = os.path.join(parent_dir, "faiss_index")
+        faiss_path = os.path.join(current_dir, name)
        
         print("FAISS index path from disk...", faiss_path)
         if os.path.exists(faiss_path):
@@ -79,14 +80,112 @@ class StoryCreativityChain:
             self.db = FAISS.load_local(faiss_path, HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2"), allow_dangerous_deserialization=True)
         else:
             print("FAISS index not present")
-            self.db = self.build_faiss_index()
-            self.db.save_local(faiss_path)  # saving index to disk for future use
+            # self.db = self.build_faiss_index()
+            
+            name = "TEP 2022, 2023, 2024, 2025 Schools .xlsx"   
+        
+            excel_file_path = None
+            
+            # Check current directory first
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            excel_file_path = os.path.join(current_dir, name)
+            
+            # Initialize processor
+            processor = SchoolDataProcessor(excel_file_path)
+            
+            self.db = processor.build_faiss_index()
+            
+            # Save index
+            self.db.save_local("faiss_index")
+            print("FAISS index saved successfully!")
 
         self.retriever = self.db.as_retriever()
 
-
-    def get_retriever(self):
+    def get_retriever_simple(self):
         return self.retriever
+
+    def get_retriever(self, query):
+        
+        genai.configure(api_key="AIzaSyCpOdJgQIiE9wlgafM4FKV1WhydtTn58eI")        
+        
+        model = genai.GenerativeModel(
+            model_name="gemini-2.0-flash"
+        )
+        
+        prompt = f"""
+        Extract the following entities from the user query strictly in JSON format:
+        - country (if present)
+        - year (only 2022–2025 if present)
+        - school_name (if present)
+
+        Also make sure if country in query is United States, you should add it as: "USA"
+
+        Query: "{query}"
+
+        Output only JSON strictly in this format:
+        {{
+        "country": "<country or null>",
+        "year": "<year or null>",
+        "school_name": "<school name or null>"
+        }}
+        """
+
+        response = model.generate_content(
+            prompt,
+            generation_config={
+                "temperature": 0.1,
+                "max_output_tokens": 200,
+                "top_p": 0.8,
+                "top_k": 40
+            }
+        )
+
+        try:
+            text = response.text.strip()
+
+            # Step 2: Extract JSON substring using regex (handles cases with extra text)
+            match = re.search(r"\{.*\}", text, re.DOTALL)
+            if match:
+                text = match.group(0)
+
+            # Step 3: Try loading JSON
+            entities = json.loads(text)
+            
+            print("Model's result: ", entities)
+            
+        except Exception:
+            # Fallback if Gemini returns something unexpected
+            entities = {"country": None, "year": None, "school_name": None}
+            
+        k = 10
+            
+        kwargs = {"k": k, "fetch_k": max(50, k * 5)}
+
+        print("Model's entities: ", entities)
+
+        # Build filter dict dynamically from available entities
+        filter_kwargs = {}
+        if entities.get("year"):
+            filter_kwargs["year"] = entities["year"]
+        if entities.get("country"):
+            filter_kwargs["country"] = entities["country"]
+        if entities.get("school_name"):
+            filter_kwargs["school_name"] = entities["school_name"]
+
+        if filter_kwargs:
+            kwargs["filter"] = filter_kwargs
+
+        # primary: filtered search
+        retriever = self.db.as_retriever(search_type="similarity", search_kwargs=kwargs)
+
+        docs = retriever.get_relevant_documents(query)
+
+        # fallback: if nothing found with filter, drop the filter
+        if not docs and filter_kwargs:
+            retriever = self.db.as_retriever(search_type="similarity",
+                                search_kwargs={"k": k, "fetch_k": max(50, k * 5)})
+        
+        return retriever
 
 
     def get_flow_step(self, index: int, FLOW_LIST):
@@ -145,8 +244,8 @@ class StoryCreativityChain:
 
 
     def getNewChain(self):
-        # prompt = self.getPromptFromTemplate(0, flow_states)
-        prompt = ""
+        prompt = PromptTemplate(template="")
+        # prompt = ""
         memory = ConversationBufferMemory(input_key="question", memory_key="history", max_len=5)
         llm_chain = LLMChain(prompt=prompt, llm=self.llm, verbose=True, memory=memory,
                              output_parser=CustomOutputParser())

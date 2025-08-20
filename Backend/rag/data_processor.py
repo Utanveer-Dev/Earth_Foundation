@@ -295,7 +295,6 @@ def extract_query_entities(query: str) -> Dict[str, Optional[str]]:
     )
 
     try:
-        
         text = response.text.strip()
 
         # Step 2: Extract JSON substring using regex (handles cases with extra text)

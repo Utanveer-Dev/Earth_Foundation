@@ -78,14 +78,17 @@ EDUCATOR_FLOW = {
     },
     
     
-    "GREET_USER": {   # 6
+    "GREET_USER_AND_ASK_EDUCATION_SETTING": {   # 6
         "system_instruction": (
                 "After getting the user's name, email, and their country's name, greet them as following and ask them where do they teach."
-                "Respond strictly according to the following prompt in plain text:"
+                "Respond strictly according to the following prompt named First Prompt in plain text if context contains data from {country}: or "
+                "Respond strictly according to the following prompt named Second Prompt in plain text if context does not contain data from {country}:"
         ),  
         
-        "prompt1": "Last year regional winners were from {country}. Do you teach in an institution or home school?",
-        "prompt2": "WOW we have never had a teacher from {country} before. Do you teach in an institution or home school?"
+        "prompt": (
+            "First Prompt: Last year regional winners were from {country}. Do you teach in an institution or home school?"
+            "Second Prompt: WOW we have never had a teacher from {country} before. Do you teach in an institution or home school?"
+        )
     },
     
     
@@ -179,7 +182,7 @@ EDUCATOR_FLOW = {
     },
     
     
-    "GREET_USER": {
+    "GREET_USER_AND_ASK_INVOLVEMENT": {
         "system_instruction": (
                 "Now greet user as following and ask them if they had involved in the Earth Prize before? "
                 "Respond strictly according to the following prompt in plain text:"
@@ -204,7 +207,7 @@ EDUCATOR_FLOW = {
     },
     
     
-    "NO_INVOLVMENT": {
+    "NO_INVOLVMENT": {     # 16
         "system_instruction": (
                 "Now greet user as following and ask them if they would like to learn more about The Earth Prize?? "
                 "Respond strictly according to the following prompt in plain text:"
@@ -213,7 +216,7 @@ EDUCATOR_FLOW = {
         "prompt": "Welcome! You are now going to be part of a community of changemakers! Would you like to learn more about The Earth Prize??",
     },
     
-    "YES_INVOLVMENT": {
+    "YES_INVOLVMENT": {    # 17
         "system_instruction": (
                 "Now greet user and respond with the following information and ask them if they would like to learn more about The Earth Prize?? "
                 "Respond strictly according to the following prompt in plain text:"
