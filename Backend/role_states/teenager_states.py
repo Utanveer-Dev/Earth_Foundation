@@ -166,16 +166,18 @@ TEENAGER_FLOW = {
     },
     
     
-    "FIRST_TIME_GREET_AND_ASK_TEAM_FORMED": {     # 12
+    "FIRST_TIME_GREET_AND_ASK_EXCITE_STATEMENT": {     # 12
         "system_instruction": (
-                "Now respond with the following information and ask user if they have formed a team or not? "
+                "Now respond with the following information and ask user what excites them the " 
+                "most right now? Options for this would be given to the user by default and you " 
+                "should not give any option by yourself. "
                 "Respond strictly according to the following prompt in plain text:"
         ),  
         
         "prompt": (
             "The Earth Prize (TEP) is a global environmental sustainability competition that empowers " 
             "students to develop innovative solutions to the planet’s most pressing challenges. "
-            "Did you form a team?"   
+            "I’d love to know what excites you the most right now. Pick one (or more)! "   
         )
     },
     

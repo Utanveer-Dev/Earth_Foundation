@@ -13,7 +13,7 @@ class StoryCreativityAPIView(APIView):
     user_indices = {}
 
     def post(self, request):
-        user_id = 12  
+        user_id = 14  
         q = request.data.get("question", "").strip()
         if not q:
             return Response({"error": "No question provided"}, status=status.HTTP_400_BAD_REQUEST)
@@ -37,7 +37,7 @@ class StoryCreativityAPIView(APIView):
             worked_before = customer.worked_before
             date_of_birth = customer.date_of_birth
             in_full_time_secondary_school = customer.in_full_time_secondary_school
-            joining_info = customer.joining_info
+            joining_again = customer.joining_again
             formed_team = customer.formed_team
             submitted_motivation_statement = customer.submitted_motivation_statement
             solution_complete = customer.solution_complete

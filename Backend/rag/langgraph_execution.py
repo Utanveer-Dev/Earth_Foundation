@@ -27,6 +27,13 @@ class StoryState(TypedDict):
     age_group: Optional[str]
     initiative: Optional[str]
     worked_before: Optional[str]
+    date_of_birth: Optional[str]
+    in_full_time_secondary_school: Optional[str]
+    joining_again: Optional[str]
+    formed_team: Optional[str]
+    submitted_motivation_statement: Optional[str]
+    solution_complete: Optional[str]
+    exciting_statement: Optional[str]
     role: Optional[str]
     # interest: Optional[str]
     
@@ -499,7 +506,7 @@ def llm_no_retrieval(state: StoryState):
         print("State:  ", state)
         print("")
         
-        state["index"] += 7
+        state["index"] += 8
 
     
     else:

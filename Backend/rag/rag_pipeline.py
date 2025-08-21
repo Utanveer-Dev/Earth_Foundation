@@ -62,7 +62,7 @@ class StoryCreativityChain:
         
         self.llm = ChatGoogleGenerativeAI(
             model="gemini-2.0-flash", 
-            google_api_key="AIzaSyANj4bwTAp1cCRf6m5xiZGlVfxZtZx365Q",
+            google_api_key="AIzaSyCccg0ff4vPLA0hdw7sFPNrNV5vcTcVIO4",
             temperature=0.7,
             top_k=40,
             top_p=0.95,
@@ -106,7 +106,7 @@ class StoryCreativityChain:
 
     def get_retriever(self, query):
         
-        genai.configure(api_key="AIzaSyANj4bwTAp1cCRf6m5xiZGlVfxZtZx365Q")        
+        genai.configure(api_key="AIzaSyCccg0ff4vPLA0hdw7sFPNrNV5vcTcVIO4")        
         
         model = genai.GenerativeModel(
             model_name="gemini-2.0-flash"
