@@ -13,15 +13,13 @@ class StoryCreativityAPIView(APIView):
     user_indices = {}
 
     def post(self, request):
-        user_id = 11  
+        user_id = 12  
         q = request.data.get("question", "").strip()
         if not q:
             return Response({"error": "No question provided"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Get current index for this user, default 0
         index = self.user_indices.get(user_id, 0)
-
-        # "education_setting", "subjects", "age_group", "initiative", "worked_before"
 
         # Fetch existing customer from DB (if exists)
         customer = Customer.objects.filter(id=user_id).first()  # replace with dynamic lookup if needed
@@ -77,6 +75,8 @@ class StoryCreativityAPIView(APIView):
                 "worked_before": worked_before,
                 "role": role
             }
+
+        print("View State: ", state)
 
         try:
             # Run LangGraph

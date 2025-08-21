@@ -62,7 +62,7 @@ class StoryCreativityChain:
         
         self.llm = ChatGoogleGenerativeAI(
             model="gemini-2.0-flash", 
-            google_api_key="AIzaSyCpOdJgQIiE9wlgafM4FKV1WhydtTn58eI",
+            google_api_key="AIzaSyANj4bwTAp1cCRf6m5xiZGlVfxZtZx365Q",
             temperature=0.7,
             top_k=40,
             top_p=0.95,
@@ -106,7 +106,7 @@ class StoryCreativityChain:
 
     def get_retriever(self, query):
         
-        genai.configure(api_key="AIzaSyCpOdJgQIiE9wlgafM4FKV1WhydtTn58eI")        
+        genai.configure(api_key="AIzaSyANj4bwTAp1cCRf6m5xiZGlVfxZtZx365Q")        
         
         model = genai.GenerativeModel(
             model_name="gemini-2.0-flash"
@@ -244,7 +244,7 @@ class StoryCreativityChain:
 
 
     def getNewChain(self):
-        prompt = self.getPromptFromTemplate(0, ADULT_FLOW)
+        prompt = PromptTemplate(template="")
         # prompt = ""
         memory = ConversationBufferMemory(input_key="question", memory_key="history", max_len=5)
         llm_chain = LLMChain(prompt=prompt, llm=self.llm, verbose=True, memory=memory,

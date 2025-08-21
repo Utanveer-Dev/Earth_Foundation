@@ -2,13 +2,13 @@
 EDUCATOR_FLOW = {
     
     "INTRO": {
-        "system_instruction": (
+        "system_instruction": (  # 0
                 "You are a friendly and engaging AI assistant. Your goal is to guide the user through a series of questions to learn more about them."
                 "Maintain a warm and welcoming tone throughout the conversation."
                 "Respond according to the following prompt:"
         ),                                    
              
-        "prompt": (
+        "prompt": (   
             "I’m TEPi, The Earth Prize intelligence 🤖🌍 "
             "Welcome to our online community of Change Makers! "
             "We are building a dedicated channel just for educators, that you will be invited to join soon! "
@@ -17,7 +17,7 @@ EDUCATOR_FLOW = {
     },
     
     
-    "GET_NAME": {
+    "GET_NAME": {       # 1
         "system_instruction": (
             "You will be given a user's message containing their name. "
             "Extract the name and return **only** the following JSON format with the name filled in:"
@@ -30,7 +30,7 @@ EDUCATOR_FLOW = {
     },
     
     
-    "ASK_EMAIL": {
+    "ASK_EMAIL": {          # 2
         "system_instruction": (
                 "After getting user's name, ask them about their email."
                 "Respond strictly according to the following prompt in plain text:"
@@ -40,7 +40,7 @@ EDUCATOR_FLOW = {
     },
     
     
-    "GET_EMAIL": {
+    "GET_EMAIL": {    # 3   
         "system_instruction": (
                 "You will be given a user's message containing their email address."
                 "Extract the email address and return **only** the following JSON format with the email address filled in:"
@@ -54,7 +54,7 @@ EDUCATOR_FLOW = {
     },
     
     
-    "ASK_COUNTRY": {
+    "ASK_COUNTRY": {                # 4
         "system_instruction": (
                 "After getting user's email address, ask them about the country in which they're teaching."
                 "Respond strictly according to the following prompt in plain text:"
@@ -64,7 +64,7 @@ EDUCATOR_FLOW = {
     },
     
     
-    "GET_COUNTRY": {
+    "GET_COUNTRY": {            # 5
         "system_instruction": (
                 "You will be given a user's message containing the country in which they're teaching."
                 "Extract the country name and return **only** the following JSON format with the country name filled in:"
@@ -107,7 +107,7 @@ EDUCATOR_FLOW = {
     },
     
     
-    "ASK_SUBJECT(S)": {
+    "ASK_SUBJECT(S)": {     # 8
         "system_instruction": (
                 "Now ask user that what subject(s) do you teach? "
                 "Respond strictly according to the following prompt in plain text:"
@@ -132,7 +132,7 @@ EDUCATOR_FLOW = {
     },
     
     
-    "ASK_AGE_GROUP": {
+    "ASK_AGE_GROUP": {              # 10
         "system_instruction": (
                 "Now ask user that what age group do they teach? "
                 "Respond strictly according to the following prompt in plain text:"
@@ -157,7 +157,7 @@ EDUCATOR_FLOW = {
     },
     
     
-    "ASK_INITIATIVE": {
+    "ASK_INITIATIVE": {                             # 12
         "system_instruction": (
                 "Now ask user about the initiatives they would like to learn more about. Options for initiatives would be given to the user by default and you should not give any option by yourself. "
                 "Respond strictly according to the following prompt in plain text:"
@@ -182,7 +182,7 @@ EDUCATOR_FLOW = {
     },
     
     
-    "GREET_USER_AND_ASK_INVOLVEMENT": {
+    "GREET_USER_AND_ASK_INVOLVEMENT": {                 # 14
         "system_instruction": (
                 "Now greet user as following and ask them if they had involved in the Earth Prize before? "
                 "Respond strictly according to the following prompt in plain text:"
@@ -226,7 +226,7 @@ EDUCATOR_FLOW = {
     },
     
     
-    "GET_ANY_FURTHER_QUERY": {
+    "GET_ANY_FURTHER_QUERY": {   # 18
         "system_instruction": (
             "You will be given a user's message describing if they have any query or not? "
             "Extract their query along with Yes only if they have query and No only if they don't have any query and only return the response strictly in the following JSON format "
@@ -242,7 +242,7 @@ EDUCATOR_FLOW = {
     },
     
     
-    "LAST_GREET_USER": {
+    "LAST_GREET_USER": {    # 19
         "system_instruction": (
                 "Now greet user with the information as following "
                 "Respond strictly according to the following prompt in plain text:"
@@ -257,7 +257,7 @@ EDUCATOR_FLOW = {
     },
     
     
-    "END": {
+    "END": {      # 20
         "system_instruction": (
                 "End with the following message. "
                 "Respond strictly according to the following prompt in plain text "

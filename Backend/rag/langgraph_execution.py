@@ -34,7 +34,7 @@ class StoryState(TypedDict):
 story_chain = StoryCreativityChain()
 
 main_chain, llm_chain = story_chain.getNewChain()
-
+  
 retriever = story_chain.get_retriever_simple()
 
 llm_extract = story_chain.llm
@@ -160,6 +160,8 @@ def extract_data_from_index(state: StoryState):
             
             response_text = response.get("text", "").strip()
         
+            print("Extracted Response Text:", response_text)
+        
             match = re.search(r'\{.*\}', response_text, re.DOTALL)
             if match:
                 try:
@@ -210,7 +212,11 @@ def extract_data_from_index(state: StoryState):
 # Node 2: Run without retrieval
 def llm_no_retrieval(state: StoryState):
 
+    print("State Data One:", state)
+
     state = extract_data_from_index(state)
+    
+    print("State Data Two:", state)    
     
     if state["role"] == "adult":
         prompt = story_chain.getPromptFromTemplate(state["index"], ADULT_FLOW)
@@ -265,7 +271,7 @@ def llm_no_retrieval(state: StoryState):
         
         state["index"] += 1
         
-    elif state["role"] == "educator" and state["index"] == 16 and state["worked_before"] == "NO" or state["worked_before"] == "No" or state["worked_before"] == "no": 
+    elif state["role"] == "educator" and state["index"] == 16 and (state["worked_before"] in ["NO", "No", "no"]): 
     
         llm_chain.prompt = prompt
 
@@ -287,7 +293,7 @@ def llm_no_retrieval(state: StoryState):
         
         state["index"] += 2
     
-    elif state["role"] == "educator" and state["index"] == 16 and state["worked_before"] == "YES" or state["worked_before"] == "Yes" or state["worked_before"] == "yes": 
+    elif state["role"] == "educator" and state["index"] == 16 and (state["worked_before"] in ["YES", "Yes", "yes"]): 
         
         state["index"] += 1
         
@@ -314,6 +320,9 @@ def llm_no_retrieval(state: StoryState):
         state["index"] += 1
     
     else:
+        
+        print("State Data Three:", state)
+        
         llm_chain.prompt = prompt
 
         temp_chain = (
@@ -340,11 +349,15 @@ def llm_no_retrieval(state: StoryState):
 # Node 3: Run with retrieval
 def llm_with_retrieval(state: StoryState):
     
+    print("State Data One:", state)
+    
     state = extract_data_from_index(state)
         
+    print("State Data Two:", state)    
+    
     if state["role"] == "adult":
         prompt = story_chain.getPromptFromTemplate(state["index"], ADULT_FLOW)
-    elif state["role"] == "educator":
+    elif state["role"] == "educator" and state["index"] != 6:
         prompt = story_chain.getPromptFromTemplate(state["index"], EDUCATOR_FLOW)
     
     if state["role"] == "educator" and state["index"] == 6: 
@@ -392,7 +405,7 @@ def llm_with_retrieval(state: StoryState):
         
         state["index"] += 1
         
-    elif state["role"] == "educator" and state["index"] == 16 and state["worked_before"] == "NO" or state["worked_before"] == "No" or state["worked_before"] == "no": 
+    elif state["role"] == "educator" and state["index"] == 16 and (state["worked_before"] in ["NO", "No", "no"]): 
     
         llm_chain.prompt = prompt
 
@@ -414,7 +427,7 @@ def llm_with_retrieval(state: StoryState):
         
         state["index"] += 2
     
-    elif state["role"] == "educator" and state["index"] == 16 and state["worked_before"] == "YES" or state["worked_before"] == "Yes" or state["worked_before"] == "yes": 
+    elif state["role"] == "educator" and state["index"] == 16 and (state["worked_before"] in ["YES", "Yes", "yes"]): 
         
         state["index"] += 1
         
@@ -442,6 +455,8 @@ def llm_with_retrieval(state: StoryState):
     
     else:
         llm_chain.prompt = prompt
+        
+        print("State Data Three:", state)
         
         print("")
         print("Education Setting-----------------")
