@@ -1,5 +1,5 @@
 
-EDUCATOR_FLOW = {
+TEENAGER_FLOW = {
     
     "INTRO": {
         "system_instruction": (  # 0
@@ -136,7 +136,7 @@ EDUCATOR_FLOW = {
     },
     
     
-    "GREET_USER_AND_ASK_EDUCATION_SETTING": {   # 10
+    "GREET_USER_AND_ASK_JOINING_INFO": {   # 10
         "system_instruction": (
                 "Now greet the user as following and ask them if they're joining us again or is this their first time? "
                 "Respond strictly according to the following prompt named First Prompt in plain text if context contains data from {country} and also extract total number of schools in that country: or "
@@ -154,13 +154,13 @@ EDUCATOR_FLOW = {
     "GET_JOINING_INFO": {         # 11
         "system_instruction": (
             "You will be given a user's message describing if they're joining us again or is this their first time? "
-            "Extract their answer only in First time or Joining again and return the response strictly in the following JSON format "
+            "Extract their answer in Yes only if they're joining again or No only if this is their first time and return the response strictly in the following JSON format "
             "and do not include anything else:"
         ),
         
         "prompt": (
             "{{\n"
-            '  "Joining_info": "<First time or Joining again>"\n'
+            '  "Joining_again": "<Yes or No>"\n'
             "}}\n"
         )
     },

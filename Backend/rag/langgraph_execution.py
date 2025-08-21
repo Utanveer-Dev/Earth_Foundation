@@ -7,6 +7,7 @@ from langchain.chains import LLMChain
 from typing import Optional, TypedDict
 from role_states.adult_states import ADULT_FLOW
 from role_states.educator_states import EDUCATOR_FLOW
+from role_states.teenager_states import TEENAGER_FLOW
 import asyncio
 import re, json
 
@@ -134,7 +135,7 @@ def extract_data_from_index(state: StoryState):
         return state
     
     #-------------------------------------------------------- EDUCATOR ROLE EXTRACTION ------------------------------
-    if state["role"] == "educator":
+    elif state["role"] == "educator":
     
         if state["index"] == 1 or state["index"] == 3 or state["index"] == 5 or state["index"] == 7 or state["index"] == 9 or state["index"] == 11 or state["index"] == 13 or state["index"] == 15:
             
@@ -206,6 +207,87 @@ def extract_data_from_index(state: StoryState):
         
         return state
     
+    #-------------------------------------------------------- TEENAGER ROLE EXTRACTION ------------------------------
+    elif state["role"] == "teenager":
+    
+        if state["index"] == 1 or state["index"] == 3 or state["index"] == 5 or state["index"] == 7 or state["index"] == 9 or state["index"] == 11 or state["index"] == 13 or state["index"] == 14 or state["index"] == 16 or state["index"] == 18 or state["index"] == 20:
+            
+            TEENAGER_FLOW_LIST = list(TEENAGER_FLOW.values())
+            
+            system_instruction, prompt = story_chain.get_flow_step(state["index"], TEENAGER_FLOW_LIST)
+            
+            B_INST, E_INST = "[INST]", "[/INST]"
+            B_SYS, E_SYS = "<<SYS>>\n", "\n<</SYS>>\n\n"
+            
+            SYSTEM_PROMPT = B_SYS + system_instruction + '\n' + prompt + E_SYS
+            
+            instruction = """
+            User: {question}"""
+
+            prompt_template = B_INST + SYSTEM_PROMPT + instruction + E_INST
+            
+            final_prompt = PromptTemplate(input_variables=["question"], template=prompt_template)
+            
+            llm_chain_extract = LLMChain(prompt=final_prompt, llm=llm_extract)
+            
+            response = llm_chain_extract.invoke(state["question"])
+            
+            response_text = response.get("text", "").strip()
+        
+            print("Extracted Response Text:", response_text)
+        
+            match = re.search(r'\{.*\}', response_text, re.DOTALL)
+            if match:
+                try:
+                    data = json.loads(match.group(0))
+
+                    if state["index"] == 1 and "Name" in data:
+                        state["name"] = data["Name"]
+                        state["index"] += 1
+
+                    elif state["index"] == 3 and "Date_of_birth" in data:
+                        state["date_of_birth"] = data["Date_of_birth"]
+                        state["index"] += 1
+
+                    elif state["index"] == 5 and "Email" in data:
+                        state["email"] = data["Email"]
+                        state["index"] += 1
+
+                    elif state["index"] == 7 and "Full_time_secondary_school" in data:
+                        state["in_full_time_secondary_school"] = data["Full_time_secondary_school"]
+                        state["index"] += 1
+                        
+                    elif state["index"] == 9 and "Country" in data:
+                        state["country"] = data["Country"]
+                        state["index"] += 1
+                        
+                    elif state["index"] == 11 and "Joining_again" in data:
+                        state["joining_again"] = data["Joining_again"]
+                        state["index"] += 1
+                        
+                    elif state["index"] == 14 and "Team_formed" in data:
+                        state["formed_team"] = data["Team_formed"]
+                        state["index"] += 1
+                        
+                    elif state["index"] == 16 and "Submitted_motivation_statement" in data:
+                        state["submitted_motivation_statement"] = data["Submitted_motivation_statement"]
+                        state["index"] += 1
+                        
+                    elif state["index"] == 18 and "Solution_complete" in data:
+                        state["solution_complete"] = data["Solution_complete"]
+                        state["index"] += 1
+                        
+                    elif state["index"] == 20 and "Excite_statement" in data:
+                        state["exciting_statement"] = data["Excite_statement"]
+                        state["index"] += 1
+
+                except json.JSONDecodeError:
+                    pass  # If model returns non-JSON, skip
+
+            return state
+        
+        return state
+    
     return state
 
 
@@ -222,10 +304,11 @@ def llm_no_retrieval(state: StoryState):
         prompt = story_chain.getPromptFromTemplate(state["index"], ADULT_FLOW)
     elif state["role"] == "educator" and state["index"] != 6:
         prompt = story_chain.getPromptFromTemplate(state["index"], EDUCATOR_FLOW)
-    # elif state["role"] == "teenager":
-    #     main_chain, llm_chain = story_chain.getNewChain()
+    elif state["role"] == "teenager" and state["index"] != 10:
+        prompt = story_chain.getPromptFromTemplate(state["index"], TEENAGER_FLOW)
     
     
+    #------------------------------------------- EDUCATOR ROLE -----------------------------------------------
     if state["role"] == "educator" and state["index"] == 6: 
         # Convert to indexed list
         EDUCATOR_FLOW_LIST = list(EDUCATOR_FLOW.values())
@@ -271,6 +354,54 @@ def llm_no_retrieval(state: StoryState):
         
         state["index"] += 1
         
+    #------------------------------------------- TEENAGER ROLE -----------------------------------------------
+    elif state["role"] == "teenager" and state["index"] == 10: 
+        # Convert to indexed list
+        TEENAGER_FLOW_LIST = list(TEENAGER_FLOW.values())
+
+        system_instruction, prompt = story_chain.get_flow_step(state["index"], TEENAGER_FLOW_LIST)
+        
+        # system_prompt = "Instruction: " + instruction + "\n" + prompt
+        
+        B_INST, E_INST = "[INST]", "[/INST]"
+        B_SYS, E_SYS = "<<SYS>>\n", "\n<</SYS>>\n\n"
+        SYSTEM_PROMPT1 = B_SYS + system_instruction + '\n' + prompt + E_SYS
+
+        instruction = """
+        History: {history} \n
+        Context: {context} \n
+        User: {question}"""
+
+        prompt_template = B_INST + SYSTEM_PROMPT1 + instruction + E_INST
+        
+        # prompt_template = system_prompt + instruction
+        
+        prompt = PromptTemplate(input_variables=["country", "history", "question", "context"], template=prompt_template)
+    
+        llm_chain.prompt = prompt
+
+        temp_retriever = story_chain.get_retriever(state["question"])
+
+        temp_chain = (
+            {"country": lambda _: state["country"], "context": temp_retriever, "question": RunnablePassthrough()}
+            | llm_chain
+        )
+
+        response = temp_chain.invoke(state["question"])
+        
+        text_response = response.get("text", "").strip()
+
+        # Store plain answer
+        state["answer"] = text_response    
+
+        print("")
+        print("State:  ", state)
+        print("")
+        
+        state["index"] += 1
+    
+       
+    #------------------------------------------- EDUCATOR ROLE ----------------------------------------------- 
     elif state["role"] == "educator" and state["index"] == 16 and (state["worked_before"] in ["NO", "No", "no"]): 
     
         llm_chain.prompt = prompt
@@ -293,6 +424,7 @@ def llm_no_retrieval(state: StoryState):
         
         state["index"] += 2
     
+    #------------------------------------------- EDUCATOR ROLE -----------------------------------------------
     elif state["role"] == "educator" and state["index"] == 16 and (state["worked_before"] in ["YES", "Yes", "yes"]): 
         
         state["index"] += 1
@@ -318,6 +450,57 @@ def llm_no_retrieval(state: StoryState):
         print("")
         
         state["index"] += 1
+        
+    #------------------------------------------- TEENAGER ROLE -----------------------------------------------
+    elif state["role"] == "teenager" and state["index"] == 12 and (state["joining_again"] in ["YES", "Yes", "yes"]): 
+        
+        state["index"] += 1
+        
+        prompt = story_chain.getPromptFromTemplate(state["index"], TEENAGER_FLOW)
+        
+        llm_chain.prompt = prompt
+
+        temp_chain = (
+            {"context": RunnablePassthrough(), "question": RunnablePassthrough()}
+            | llm_chain
+        )
+
+        response = temp_chain.invoke(state["question"])
+        
+        text_response = response.get("text", "").strip()
+
+        # Store plain answer
+        state["answer"] = text_response    
+
+        print("")
+        print("State:  ", state)
+        print("")
+        
+        state["index"] += 1
+        
+    #------------------------------------------- TEENAGER ROLE -----------------------------------------------
+    elif state["role"] == "teenager" and state["index"] == 12 and (state["joining_again"] in ["NO", "No", "no"]): 
+        
+        llm_chain.prompt = prompt
+
+        temp_chain = (
+            {"context": RunnablePassthrough(), "question": RunnablePassthrough()}
+            | llm_chain
+        )
+
+        response = temp_chain.invoke(state["question"])
+        
+        text_response = response.get("text", "").strip()
+
+        # Store plain answer
+        state["answer"] = text_response    
+
+        print("")
+        print("State:  ", state)
+        print("")
+        
+        state["index"] += 7
+
     
     else:
         
@@ -359,7 +542,11 @@ def llm_with_retrieval(state: StoryState):
         prompt = story_chain.getPromptFromTemplate(state["index"], ADULT_FLOW)
     elif state["role"] == "educator" and state["index"] != 6:
         prompt = story_chain.getPromptFromTemplate(state["index"], EDUCATOR_FLOW)
-    
+    elif state["role"] == "teenager" and state["index"] != 10:
+        prompt = story_chain.getPromptFromTemplate(state["index"], TEENAGER_FLOW)
+        
+        
+    #------------------------------------------- EDUCATOR ROLE -----------------------------------------------
     if state["role"] == "educator" and state["index"] == 6: 
         # Convert to indexed list
         EDUCATOR_FLOW_LIST = list(EDUCATOR_FLOW.values())
@@ -405,6 +592,53 @@ def llm_with_retrieval(state: StoryState):
         
         state["index"] += 1
         
+    #------------------------------------------- TEENAGER ROLE -----------------------------------------------
+    elif state["role"] == "teenager" and state["index"] == 10: 
+        # Convert to indexed list
+        TEENAGER_FLOW_LIST = list(TEENAGER_FLOW.values())
+
+        system_instruction, prompt = story_chain.get_flow_step(state["index"], TEENAGER_FLOW_LIST)
+        
+        # system_prompt = "Instruction: " + instruction + "\n" + prompt
+        
+        B_INST, E_INST = "[INST]", "[/INST]"
+        B_SYS, E_SYS = "<<SYS>>\n", "\n<</SYS>>\n\n"
+        SYSTEM_PROMPT1 = B_SYS + system_instruction + '\n' + prompt + E_SYS
+
+        instruction = """
+        History: {history} \n
+        Context: {context} \n
+        User: {question}"""
+
+        prompt_template = B_INST + SYSTEM_PROMPT1 + instruction + E_INST
+        
+        # prompt_template = system_prompt + instruction
+        
+        prompt = PromptTemplate(input_variables=["country", "history", "question", "context"], template=prompt_template)
+    
+        llm_chain.prompt = prompt
+
+        temp_retriever = story_chain.get_retriever(state["question"])
+
+        temp_chain = (
+            {"country": lambda _: state["country"], "context": temp_retriever, "question": RunnablePassthrough()}
+            | llm_chain
+        )
+
+        response = temp_chain.invoke(state["question"])
+        
+        text_response = response.get("text", "").strip()
+
+        # Store plain answer
+        state["answer"] = text_response    
+
+        print("")
+        print("State:  ", state)
+        print("")
+        
+        state["index"] += 1 
+        
+    #------------------------------------------- EDUCATOR ROLE -----------------------------------------------
     elif state["role"] == "educator" and state["index"] == 16 and (state["worked_before"] in ["NO", "No", "no"]): 
     
         llm_chain.prompt = prompt
@@ -427,6 +661,7 @@ def llm_with_retrieval(state: StoryState):
         
         state["index"] += 2
     
+    #------------------------------------------- EDUCATOR ROLE -----------------------------------------------
     elif state["role"] == "educator" and state["index"] == 16 and (state["worked_before"] in ["YES", "Yes", "yes"]): 
         
         state["index"] += 1
@@ -452,6 +687,57 @@ def llm_with_retrieval(state: StoryState):
         print("")
         
         state["index"] += 1
+        
+    #------------------------------------------- TEENAGER ROLE -----------------------------------------------
+    elif state["role"] == "teenager" and state["index"] == 12 and (state["joining_again"] in ["YES", "Yes", "yes"]): 
+        
+        state["index"] += 1
+        
+        prompt = story_chain.getPromptFromTemplate(state["index"], TEENAGER_FLOW)
+        
+        llm_chain.prompt = prompt
+
+        temp_chain = (
+            {"context": retriever, "question": RunnablePassthrough()}
+            | llm_chain
+        )
+
+        response = temp_chain.invoke(state["question"])
+        
+        text_response = response.get("text", "").strip()
+
+        # Store plain answer
+        state["answer"] = text_response    
+
+        print("")
+        print("State:  ", state)
+        print("")
+        
+        state["index"] += 1
+        
+    #------------------------------------------- TEENAGER ROLE -----------------------------------------------    
+    elif state["role"] == "teenager" and state["index"] == 12 and (state["joining_again"] in ["NO", "No", "no"]): 
+        
+        llm_chain.prompt = prompt
+
+        temp_chain = (
+            {"context": retriever, "question": RunnablePassthrough()}
+            | llm_chain
+        )
+
+        response = temp_chain.invoke(state["question"])
+        
+        text_response = response.get("text", "").strip()
+
+        # Store plain answer
+        state["answer"] = text_response    
+
+        print("")
+        print("State:  ", state)
+        print("")
+        
+        state["index"] += 7    
+    
     
     else:
         llm_chain.prompt = prompt
