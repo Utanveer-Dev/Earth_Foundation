@@ -79,12 +79,25 @@ def gating_node(state: StoryState):
 
         # docs = story_chain.retriever.get_relevant_documents(standalone_question)
         # context = "\n\n".join([doc.page_content for doc in docs])
-        return {"question": state["question"], "needs_retrieval": True}
+        return {"question": state["question"], "needs_retrieval": False}
     else:
         return {"question": state["question"], "context": "", "needs_retrieval": False}
 
 
 def extract_data_from_index(state: StoryState):
+    
+    def is_invalid(value1, value2):
+        if not value1:  # empty or None
+            return True
+        
+        value1_str = str(value1).strip().lower()
+        value2_str = str(value2).strip().lower()
+        print("")
+        print("Values: ", value1_str, " ", value2_str)
+        print("")
+        if value1_str in ["null"] or value2_str in ["null", "no"]:
+            return True                        
+        return False
     
     #-------------------------------------------------------- ADULT ROLE EXTRACTION ------------------------------
     if state["role"] == "adult":
@@ -119,20 +132,35 @@ def extract_data_from_index(state: StoryState):
                     data = json.loads(match.group(0))
 
                     if state["index"] == 1 and "Name" in data:
-                        state["name"] = data["Name"]
-                        state["index"] += 1
+                        if is_invalid(data["Name"], data["Present"]):
+                            state["index"] -= 1
+                        else:
+                            state["name"] = data["Name"]
+                            state["index"] += 1
+
 
                     elif state["index"] == 3 and "Email" in data:
-                        state["email"] = data["Email"]
-                        state["index"] += 1
+                        if is_invalid(data["Email"], data["Present"]):
+                            state["index"] -= 1
+                        else:
+                            state["email"] = data["Email"]
+                            state["index"] += 1
+
 
                     elif state["index"] == 5 and "Country" in data:
-                        state["country"] = data["Country"]
-                        state["index"] += 1
+                        if is_invalid(data["Country"], data["Present"]):
+                            state["index"] -= 1
+                        else:
+                            state["country"] = data["Country"]
+                            state["index"] += 1
+
 
                     elif state["index"] == 7 and "Representation" in data:
-                        state["representation"] = data["Representation"]
-                        state["index"] += 1
+                        if is_invalid(data["Representation"], data["Present"]):
+                            state["index"] -= 1
+                        else:
+                            state["representation"] = data["Representation"]
+                            state["index"] += 1
 
                 except json.JSONDecodeError:
                     pass  # If model returns non-JSON, skip
@@ -176,36 +204,68 @@ def extract_data_from_index(state: StoryState):
                     data = json.loads(match.group(0))
 
                     if state["index"] == 1 and "Name" in data:
-                        state["name"] = data["Name"]
-                        state["index"] += 1
+                        if is_invalid(data["Name"], data["Present"]):
+                            state["index"] -= 1
+                        else:
+                            state["name"] = data["Name"]
+                            state["index"] += 1
+
 
                     elif state["index"] == 3 and "Email" in data:
-                        state["email"] = data["Email"]
-                        state["index"] += 1
+                        if is_invalid(data["Email"], data["Present"]):
+                            state["index"] -= 1
+                        else:
+                            state["email"] = data["Email"]
+                            state["index"] += 1
+
 
                     elif state["index"] == 5 and "Country" in data:
-                        state["country"] = data["Country"]
-                        state["index"] += 1
+                        if is_invalid(data["Country"], data["Present"]):
+                            state["index"] -= 1
+                        else:
+                            state["country"] = data["Country"]
+                            state["index"] += 1
+
 
                     elif state["index"] == 7 and "Education_setting" in data:
-                        state["education_setting"] = data["Education_setting"]
-                        state["index"] += 1
-                        
+                        if is_invalid(data["Education_setting"], data["Present"]):
+                            state["index"] -= 1
+                        else:
+                            state["education_setting"] = data["Education_setting"]
+                            state["index"] += 1
+
+
                     elif state["index"] == 9 and "Subject(s)" in data:
-                        state["subjects"] = data["Subject(s)"]
-                        state["index"] += 1
-                        
+                        if is_invalid(data["Subject(s)"], data["Present"]):
+                            state["index"] -= 1
+                        else:
+                            state["subjects"] = data["Subject(s)"]
+                            state["index"] += 1
+
+
                     elif state["index"] == 11 and "Age_group" in data:
-                        state["age_group"] = data["Age_group"]
-                        state["index"] += 1
-                        
+                        if is_invalid(data["Age_group"], data["Present"]):
+                            state["index"] -= 1
+                        else:
+                            state["age_group"] = data["Age_group"]
+                            state["index"] += 1
+
+
                     elif state["index"] == 13 and "Initiatives" in data:
-                        state["initiative"] = data["Initiatives"]
-                        state["index"] += 1
-                        
-                    elif state["index"] == 15 and "Involvment_before" in data:
-                        state["worked_before"] = data["Involvment_before"]
-                        state["index"] += 1
+                        if is_invalid(data["Initiatives"], data["Present"]):
+                            state["index"] -= 1
+                        else:
+                            state["initiative"] = data["Initiatives"]
+                            state["index"] += 1
+
+
+                    elif state["index"] == 15 and "Involvement_before" in data:
+                        if is_invalid(data["Involvement_before"], data["Present"]):
+                            state["index"] -= 1
+                        else:
+                            state["worked_before"] = data["Involvement_before"]
+                            state["index"] += 1
+
 
                 except json.JSONDecodeError:
                     pass  # If model returns non-JSON, skip
@@ -249,44 +309,83 @@ def extract_data_from_index(state: StoryState):
                     data = json.loads(match.group(0))
 
                     if state["index"] == 1 and "Name" in data:
-                        state["name"] = data["Name"]
-                        state["index"] += 1
+                        if is_invalid(data["Name"], data["Present"]):
+                                state["index"] -= 1
+                        else:
+                            state["name"] = data["Name"]
+                            state["index"] += 1
+
 
                     elif state["index"] == 3 and "Date_of_birth" in data:
-                        state["date_of_birth"] = data["Date_of_birth"]
-                        state["index"] += 1
+                        if is_invalid(data["Date_of_birth"], data["Present"]):
+                                state["index"] -= 1
+                        else:
+                            state["date_of_birth"] = data["Date_of_birth"]
+                            state["index"] += 1
+
 
                     elif state["index"] == 5 and "Email" in data:
-                        state["email"] = data["Email"]
-                        state["index"] += 1
+                        if is_invalid(data["Email"], data["Present"]):
+                                state["index"] -= 1
+                        else:
+                            state["email"] = data["Email"]
+                            state["index"] += 1
+
 
                     elif state["index"] == 7 and "Full_time_secondary_school" in data:
-                        state["in_full_time_secondary_school"] = data["Full_time_secondary_school"]
-                        state["index"] += 1
+                        if is_invalid(data["Full_time_secondary_school"], data["Present"]):
+                                state["index"] -= 1
+                        else:
+                            state["in_full_time_secondary_school"] = data["Full_time_secondary_school"]
+                            state["index"] += 1
+                        
                         
                     elif state["index"] == 9 and "Country" in data:
-                        state["country"] = data["Country"]
-                        state["index"] += 1
+                        if is_invalid(data["Country"], data["Present"]):
+                                state["index"] -= 1
+                        else:
+                            state["country"] = data["Country"]
+                            state["index"] += 1
+                        
                         
                     elif state["index"] == 11 and "Joining_again" in data:
-                        state["joining_again"] = data["Joining_again"]
-                        state["index"] += 1
+                        if is_invalid(data["Joining_again"], data["Present"]):
+                                state["index"] -= 1
+                        else:
+                            state["joining_again"] = data["Joining_again"]
+                            state["index"] += 1
+                        
                         
                     elif state["index"] == 14 and "Team_formed" in data:
-                        state["formed_team"] = data["Team_formed"]
-                        state["index"] += 1
+                        if is_invalid(data["Team_formed"], data["Present"]):
+                                state["index"] -= 1
+                        else:
+                            state["formed_team"] = data["Team_formed"]
+                            state["index"] += 1
+                        
                         
                     elif state["index"] == 16 and "Submitted_motivation_statement" in data:
-                        state["submitted_motivation_statement"] = data["Submitted_motivation_statement"]
-                        state["index"] += 1
+                        if is_invalid(data["Submitted_motivation_statement"], data["Present"]):
+                                state["index"] -= 1
+                        else:
+                            state["submitted_motivation_statement"] = data["Submitted_motivation_statement"]
+                            state["index"] += 1
+                        
                         
                     elif state["index"] == 18 and "Solution_complete" in data:
-                        state["solution_complete"] = data["Solution_complete"]
-                        state["index"] += 1
+                        if is_invalid(data["Solution_complete"], data["Present"]):
+                                state["index"] -= 1
+                        else:
+                            state["solution_complete"] = data["Solution_complete"]
+                            state["index"] += 1
+                        
                         
                     elif state["index"] == 20 and "Excite_statement" in data:
-                        state["exciting_statement"] = data["Excite_statement"]
-                        state["index"] += 1
+                        if is_invalid(data["Excite_statement"], data["Present"]):
+                                state["index"] -= 1
+                        else:
+                            state["exciting_statement"] = data["Excite_statement"]
+                            state["index"] += 1
 
                 except json.JSONDecodeError:
                     pass  # If model returns non-JSON, skip

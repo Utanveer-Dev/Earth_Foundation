@@ -16,22 +16,26 @@ ADULT_FLOW = {
     },
     
     
-    "GET_NAME": {
+    "GET_NAME": {       # 1
         "system_instruction": (
-            "You will be given a user's message containing their name. "
-            "Extract the name and return **only** the following JSON format with the name filled in:"
+            "You will receive a user's message containing their name. "
+            "Your task is to extract the name and respond **only** in the exact JSON format below. "
+            "If the name is present, return it and set 'Present' to 'Yes'. "
+            "If no name is provided, set 'Name' to Null and 'Present' to 'No'. "
+            "Do not add extra text or explanation."
         ),
         "prompt": (
-           "{{\n"
-            '  "Name": "<extracted_name>"\n'
-           "}}\n"
+            "{{\n"
+            '  "Name": "<extracted_name_or_null>",\n'
+            '  "Present": "<Yes_or_No>"\n'
+            "}}\n"
         )
     },
     
     
     "ASK_EMAIL": {
         "system_instruction": (
-                "After getting user's name, ask them about their email."
+                "Now ask the user about their email."
                 "Respond strictly according to the following prompt in plain text:"
         ),
         
@@ -39,15 +43,19 @@ ADULT_FLOW = {
     },
     
     
-    "GET_EMAIL": {
+    "GET_EMAIL": {    # 3   
         "system_instruction": (
-                "You will be given a user's message containing their email address."
-                "Extract the email address and return **only** the following JSON format with the email address filled in:"
+               "You will receive a user's message containing their email. "
+               "Your task is to extract the email and respond **only** in the exact JSON format below. "
+               "If the email is present, return it and set 'Present' to 'Yes'. "
+               "If no email is provided, set 'Email' to Null and 'Present' to 'No'. "
+               "Do not add extra text or explanation."
         ),  
         
         "prompt": (
             "{{\n"
-            '  "Email": "<extracted_email>"\n'
+            '  "Email": "<extracted_email_or_null>",\n'
+            '  "Present": "<Yes_or_No>"\n'
             "}}\n"
         )
     },
@@ -55,7 +63,7 @@ ADULT_FLOW = {
     
     "ASK_COUNTRY": {
         "system_instruction": (
-                "After getting user's email address, ask them about their country."
+                "Now ask the user about their country."
                 "Respond strictly according to the following prompt in plain text:"
         ),
         
@@ -63,15 +71,19 @@ ADULT_FLOW = {
     },
     
     
-    "GET_COUNTRY": {
+    "GET_COUNTRY": {            # 5
         "system_instruction": (
-                "You will be given a user's message containing their country name."
-                "Extract the country name and return **only** the following JSON format with the country name filled in:"
+               "You will receive a user's message containing their country name. "
+               "Your task is to extract the country name and respond **only** in the exact JSON format below. "
+               "If the country name is present, return it and set 'Present' to 'Yes'. "
+               "If no country name is provided, set 'Country' to Null and 'Present' to 'No'. "
+               "Do not add extra text or explanation."
         ),  
         
         "prompt": (
             "{{\n"
-            '  "Country": "<extracted_country>"\n'
+            '  "Country": "<extracted_country_name_or_null>",\n'
+            '  "Present": "<Yes_or_No>"\n'
             "}}\n"
         )
     },
@@ -79,7 +91,8 @@ ADULT_FLOW = {
     
     "GREET_USER": {
         "system_instruction": (
-                "After getting the user's name and their country's name, greet them and ask what represents them best. The options will be provided to the user by default, so you should not provide any options yourself."
+                "Now greet the user as following and ask what represents them best. " 
+                "The options will be provided to the user by default, so you should not provide any options yourself. "
                 "Respond strictly according to the following prompt in plain text:"
         ),  
         
@@ -87,16 +100,19 @@ ADULT_FLOW = {
     },
     
     
-    "GET_REPRESENTATION": {
+    "GET_REPRESENTATION": {    
         "system_instruction": (
-            "You will be given a user's message describing what represents them best "
-            "Extract only that representation and return the response strictly in the following JSON format "
-            "and do not include anything else:"
-        ),
+               "You will receive a user's message describing what represents them best. "
+               "Your task is to extract that representation and respond **only** in the exact JSON format below. "
+               "If the representation is present, return it and set 'Present' to 'Yes'. "
+               "If no representation is provided, set 'Representation' to Null and 'Present' to 'No'. "
+               "Do not add extra text or explanation."
+        ),  
         
         "prompt": (
             "{{\n"
-            '  "Representation": "<extracted_representation>"\n'
+            '  "Representation": "<extracted_representation_or_null>",\n'
+            '  "Present": "<Yes_or_No>"\n'
             "}}\n"
         )
     },

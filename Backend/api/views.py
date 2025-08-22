@@ -13,7 +13,7 @@ class StoryCreativityAPIView(APIView):
     user_indices = {}
 
     def post(self, request):
-        user_id = 14  
+        user_id = 16  
         q = request.data.get("question", "").strip()
         if not q:
             return Response({"error": "No question provided"}, status=status.HTTP_400_BAD_REQUEST)

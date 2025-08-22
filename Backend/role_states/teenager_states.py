@@ -19,20 +19,24 @@ TEENAGER_FLOW = {
     
     "GET_NAME": {       # 1
         "system_instruction": (
-            "You will be given a user's message containing their name. "
-            "Extract the name and return **only** the following JSON format with the name filled in:"
+            "You will receive a user's message containing their name. "
+            "Your task is to extract the name and respond **only** in the exact JSON format below. "
+            "If the name is present, return it and set 'Present' to 'Yes'. "
+            "If no name is provided, set 'Name' to Null and 'Present' to 'No'. "
+            "Do not add extra text or explanation."
         ),
         "prompt": (
-           "{{\n"
-            '  "Name": "<extracted_name>"\n'
-           "}}\n"
+            "{{\n"
+            '  "Name": "<extracted_name_or_null>",\n'
+            '  "Present": "<Yes_or_No>"\n'
+            "}}\n"
         )
     },
     
     
     "ASK_DOB": {          # 2
         "system_instruction": (
-                "After getting user's name, ask them about their date of birth."
+                "Now ask the user about their date of birth."
                 "Respond strictly according to the following prompt in plain text:"
         ),
         
@@ -46,13 +50,16 @@ TEENAGER_FLOW = {
     
     "GET_DOB": {    # 3   
         "system_instruction": (
-                "You will be given a user's message containing their date of birth."
-                "Extract only the date of birth and return **only** the following JSON format with the date of birth filled in:"
-        ),  
-        
+            "You will receive a user's message containing their date of birth. "
+            "Your task is to extract the date of birth and respond **only** in the exact JSON format below. "
+            "If the date of birth is present, return it and set 'Present' to 'Yes'. "
+            "If no date of birth is provided, set 'Date_of_birth' to Null and 'Present' to 'No'. "
+            "Do not add extra text or explanation."
+        ),
         "prompt": (
             "{{\n"
-            '  "Date_of_birth": "<extracted_date_of_birth>"\n'
+            '  "Date_of_birth": "<extracted_date_of_birth_or_null>",\n'
+            '  "Present": "<Yes_or_No>"\n'
             "}}\n"
         )
     },
@@ -60,7 +67,7 @@ TEENAGER_FLOW = {
     
     "ASK_EMAIL": {          # 4
         "system_instruction": (
-                "After getting user's name, greet them as following and ask them about their email."
+                "Now greet the user as following and ask them about their email."
                 "Respond strictly according to the following prompt in plain text:"
         ),
         
@@ -73,13 +80,17 @@ TEENAGER_FLOW = {
     
     "GET_EMAIL": {    # 5   
         "system_instruction": (
-                "You will be given a user's message containing their email address."
-                "Extract the email address and return **only** the following JSON format with the email address filled in:"
+               "You will receive a user's message containing their email. "
+               "Your task is to extract the email and respond **only** in the exact JSON format below. "
+               "If the email is present, return it and set 'Present' to 'Yes'. "
+               "If no email is provided, set 'Email' to Null and 'Present' to 'No'. "
+               "Do not add extra text or explanation."
         ),  
         
         "prompt": (
             "{{\n"
-            '  "Email": "<extracted_email>"\n'
+            '  "Email": "<extracted_email_or_null>",\n'
+            '  "Present": "<Yes_or_No>"\n'
             "}}\n"
         )
     },
@@ -87,7 +98,8 @@ TEENAGER_FLOW = {
     
     "ASK_SCHOOL_SETTING": {   # 6
         "system_instruction": (
-                "Now ask user if they're in full-time secondary school?"
+                "Now ask the user if they're in full-time secondary school?"
+                "Respond strictly according to the following prompt in plain text:"
         ),  
         
         "prompt": (
@@ -98,14 +110,17 @@ TEENAGER_FLOW = {
     
     "GET_SCHOOL_SETTING": {         # 7
         "system_instruction": (
-            "You will be given a user's message describing if they're in full-time secondary school or not. "
-            "Extract only the answer in Yes or No and return the response strictly in the following JSON format "
-            "and do not include anything else:"
-        ),
+               "You will receive a user's message describing if they're in full-time secondary school or not. "
+               "Your task is to extract a clear Yes or No answer from the message and respond **only** in the exact JSON format below. "
+               "If an answer is provided, set 'Full_time_secondary_school' to 'Yes' or 'No' accordingly, and set 'Present' to 'Yes'. "
+               "If the user does not provide a clear answer, set 'Full_time_secondary_school' to Null and 'Present' to 'No'. "
+               "Return only JSON, no extra text or explanation."
+        ),  
         
         "prompt": (
             "{{\n"
-            '  "Full_time_secondary_school": "<Yes or No>"\n'
+            '  "Full_time_secondary_school": "<Yes_or_No_or_null>",\n'
+            '  "Present": "<Yes_or_No>"\n'
             "}}\n"
         )
     },
@@ -124,13 +139,17 @@ TEENAGER_FLOW = {
     
     "GET_COUNTRY": {            # 9
         "system_instruction": (
-                "You will be given a user's message containing the country from which they're joining from."
-                "Extract the country name and return **only** the following JSON format with the country name filled in:"
+               "You will receive a user's message containing their country name. "
+               "Your task is to extract the country name and respond **only** in the exact JSON format below. "
+               "If the country name is present, return it and set 'Present' to 'Yes'. "
+               "If no country name is provided, set 'Country' to Null and 'Present' to 'No'. "
+               "Do not add extra text or explanation."
         ),  
         
         "prompt": (
             "{{\n"
-            '  "Country": "<extracted_country>"\n'
+            '  "Country": "<extracted_country_name_or_null>",\n'
+            '  "Present": "<Yes_or_No>"\n'
             "}}\n"
         )
     },
@@ -153,14 +172,17 @@ TEENAGER_FLOW = {
     
     "GET_JOINING_INFO": {         # 11
         "system_instruction": (
-            "You will be given a user's message describing if they're joining us again or is this their first time? "
-            "Extract their answer in Yes only if they're joining again or No only if this is their first time and return the response strictly in the following JSON format "
-            "and do not include anything else:"
-        ),
+               "You will receive a user's message describing if they're joining us again or is this their first time? "
+               "Your task is to extract a clear Yes or No answer from the message and respond **only** in the exact JSON format below. "
+               "If an answer is provided, set 'Joining_again' to 'Yes' or 'No' accordingly, and set 'Present' to 'Yes'. "
+               "If the user does not provide a clear answer, set 'Joining_again' to Null and 'Present' to 'No'. "
+               "Return only JSON, no extra text or explanation."
+        ),  
         
         "prompt": (
             "{{\n"
-            '  "Joining_again": "<Yes or No>"\n'
+            '  "Joining_again": "<Yes_or_No_or_null>",\n'
+            '  "Present": "<Yes_or_No>"\n'
             "}}\n"
         )
     },
@@ -199,13 +221,17 @@ TEENAGER_FLOW = {
     
     "GET_TEAM_FORM": {    # 14
         "system_instruction": (
-            "You will be given a user's message describing if they have formed a team or not? "
-            "Only extract the answer in Yes or No format from the message and return it strictly in the following JSON format and do not include anything else. "
-        ),
+            "You will receive a user's message describing if they have formed a team or not? "
+            "Your task is to extract a clear Yes or No answer from the message and respond **only** in the exact JSON format below. "
+            "If an answer is provided, set 'Team_formed' to 'Yes' or 'No' accordingly, and set 'Present' to 'Yes'. "
+            "If the user does not provide a clear answer, set 'Team_formed' to Null and 'Present' to 'No'. "
+            "Return only JSON, no extra text or explanation."
+        ),  
         
         "prompt": (
             "{{\n"
-            '  "Team_formed": "<Yes or No>"\n'
+            '  "Team_formed": "<Yes_or_No_or_null>",\n'
+            '  "Present": "<Yes_or_No>"\n'
             "}}\n"
         )
     },
@@ -223,13 +249,17 @@ TEENAGER_FLOW = {
     
     "GET_MOTIVATION_STATEMENT": {     # 16
         "system_instruction": (
-            "You will be given a user's message describing if they have submitted their motivation statement or not? "
-            "Only extract the answer in Yes or No format from the message and return it strictly in the following JSON format and do not include anything else. "
-        ),
+            "You will receive a user's message describing if they have submitted their motivation statement or not? "
+            "Your task is to extract a clear Yes or No answer from the message and respond **only** in the exact JSON format below. "
+            "If an answer is provided, set 'Submitted_motivation_statement' to 'Yes' or 'No' accordingly, and set 'Present' to 'Yes'. "
+            "If the user does not provide a clear answer, set 'Submitted_motivation_statement' to Null and 'Present' to 'No'. "
+            "Return only JSON, no extra text or explanation."
+        ),  
         
         "prompt": (
             "{{\n"
-            '  "Submitted_motivation_statement": "<Yes or No>"\n'
+            '  "Submitted_motivation_statement": "<Yes_or_No_or_null>",\n'
+            '  "Present": "<Yes_or_No>"\n'
             "}}\n"
         )
     },
@@ -247,13 +277,17 @@ TEENAGER_FLOW = {
     
     "GET_SOLUTION_COMPLETE": {     # 18
         "system_instruction": (
-            "You will be given a user's message describing if they have completed their solution or not? "
-            "Only extract the answer in Yes or No format from the message and return it strictly in the following JSON format and do not include anything else. "
-        ),
+            "You will receive a user's message describing if they have completed their solution or not? "
+            "Your task is to extract a clear Yes or No answer from the message and respond **only** in the exact JSON format below. "
+            "If an answer is provided, set 'Solution_complete' to 'Yes' or 'No' accordingly, and set 'Present' to 'Yes'. "
+            "If the user does not provide a clear answer, set 'Solution_complete' to Null and 'Present' to 'No'. "
+            "Return only JSON, no extra text or explanation."
+        ),  
         
         "prompt": (
             "{{\n"
-            '  "Solution_complete": "<Yes or No>"\n'
+            '  "Solution_complete": "<Yes_or_No_or_null>",\n'
+            '  "Present": "<Yes_or_No>"\n'
             "}}\n"
         )
     },
@@ -271,18 +305,21 @@ TEENAGER_FLOW = {
     
     "GET_EXCITE_STATEMENT": {    # 20
         "system_instruction": (
-            "You will be given a user's message describing what excites them the most right now. "
-            "Extract only their statement from the message and return it strictly in the following JSON format, "
-            "and do not include anything else."
-        ),
+            "You will receive a user's message describing what excites them the most right now. "
+            "Your task is to extract the answer from the message and respond **only** in the exact JSON format below. "
+            "If an excite statement is provided, return it and set 'Present' to 'Yes'. "
+            "If no excite statement is provided, set 'Excite_statement' to Null and 'Present' to 'No'. "
+            "Do not add extra text or explanation."
+        ),  
         
         "prompt": (
             "{{\n"
-            '  "Excite_statement": "<excite_statement>"\n'
+            '  "Excite_statement": "<extracted_excite_statement_or_null>",\n'
+            '  "Present": "<Yes_or_No>"\n'
             "}}\n"
         )
     },
-    
+
     
     # "LAST_GREET_USER": {    # 19
     #     "system_instruction": (

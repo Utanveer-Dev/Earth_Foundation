@@ -19,20 +19,25 @@ EDUCATOR_FLOW = {
     
     "GET_NAME": {       # 1
         "system_instruction": (
-            "You will be given a user's message containing their name. "
-            "Extract the name and return **only** the following JSON format with the name filled in:"
+            "You will receive a user's message containing their name. "
+            "Your task is to extract the name and respond **only** in the exact JSON format below. "
+            "If the name is present, return it and set 'Present' to 'Yes'. "
+            "If no name is provided, set 'Name' to Null and 'Present' to 'No'. "
+            "Do not add extra text or explanation."
         ),
         "prompt": (
-           "{{\n"
-            '  "Name": "<extracted_name>"\n'
-           "}}\n"
+            "{{\n"
+            '  "Name": "<extracted_name_or_null>",\n'
+            '  "Present": "<Yes_or_No>"\n'
+            "}}\n"
         )
     },
+
     
     
     "ASK_EMAIL": {          # 2
         "system_instruction": (
-                "After getting user's name, ask them about their email."
+                "Now ask the user about their email."
                 "Respond strictly according to the following prompt in plain text:"
         ),
         
@@ -42,13 +47,17 @@ EDUCATOR_FLOW = {
     
     "GET_EMAIL": {    # 3   
         "system_instruction": (
-                "You will be given a user's message containing their email address."
-                "Extract the email address and return **only** the following JSON format with the email address filled in:"
+               "You will receive a user's message containing their email. "
+               "Your task is to extract the email and respond **only** in the exact JSON format below. "
+               "If the email is present, return it and set 'Present' to 'Yes'. "
+               "If no email is provided, set 'Email' to Null and 'Present' to 'No'. "
+               "Do not add extra text or explanation."
         ),  
         
         "prompt": (
             "{{\n"
-            '  "Email": "<extracted_email>"\n'
+            '  "Email": "<extracted_email_or_null>",\n'
+            '  "Present": "<Yes_or_No>"\n'
             "}}\n"
         )
     },
@@ -56,7 +65,7 @@ EDUCATOR_FLOW = {
     
     "ASK_COUNTRY": {                # 4
         "system_instruction": (
-                "After getting user's email address, ask them about the country in which they're teaching."
+                "Now ask the user about the country in which they're teaching."
                 "Respond strictly according to the following prompt in plain text:"
         ),
         
@@ -66,13 +75,17 @@ EDUCATOR_FLOW = {
     
     "GET_COUNTRY": {            # 5
         "system_instruction": (
-                "You will be given a user's message containing the country in which they're teaching."
-                "Extract the country name and return **only** the following JSON format with the country name filled in:"
+               "You will receive a user's message containing the country name in which they're teaching. "
+               "Your task is to extract the country name and respond **only** in the exact JSON format below. "
+               "If the country name is present, return it and set 'Present' to 'Yes'. "
+               "If no country name is provided, set 'Country' to Null and 'Present' to 'No'. "
+               "Do not add extra text or explanation."
         ),  
         
         "prompt": (
             "{{\n"
-            '  "Country": "<extracted_country>"\n'
+            '  "Country": "<extracted_country_name_or_null>",\n'
+            '  "Present": "<Yes_or_No>"\n'
             "}}\n"
         )
     },
@@ -80,7 +93,7 @@ EDUCATOR_FLOW = {
     
     "GREET_USER_AND_ASK_EDUCATION_SETTING": {   # 6
         "system_instruction": (
-                "After getting the user's name, email, and their country's name, greet them as following and ask them where do they teach."
+                "Now greet the user as following and ask them where do they teach."
                 "Respond strictly according to the following prompt named First Prompt in plain text if context contains data from {country}: or "
                 "Respond strictly according to the following prompt named Second Prompt in plain text if context does not contain data from {country}:"
         ),  
@@ -94,14 +107,17 @@ EDUCATOR_FLOW = {
     
     "GET_EDUCATION_SETTING": {         # 7
         "system_instruction": (
-            "You will be given a user's message describing where do they teach "
-            "Extract only that education setting and return the response strictly in the following JSON format "
-            "and do not include anything else:"
-        ),
+               "You will receive a user's message describing where do they teach. "
+               "Your task is to extract the education setting where they teach and respond **only** in the exact JSON format below. "
+               "If the education setting is present, return it and set 'Present' to 'Yes'. "
+               "If no education setting is provided, set 'Education_setting' to Null and 'Present' to 'No'. "
+               "Do not add extra text or explanation."
+        ),  
         
         "prompt": (
             "{{\n"
-            '  "Education_setting": "<education_setting>"\n'
+            '  "Education_setting": "<extracted_education_setting_or_null>",\n'
+            '  "Present": "<Yes_or_No>"\n'
             "}}\n"
         )
     },
@@ -117,16 +133,19 @@ EDUCATOR_FLOW = {
     },
     
     
-    "GET_SUBJECT(S)": {    # 9
+    "GET_SUBJECT(S)": {    # 9        
         "system_instruction": (
-            "You will be given a user's message describing the subject(s) they teach. "
-            "Only extract the subject(s) from the message and return it strictly in the following JSON format and do not include anything else. "
-            "If multiple subjects are described, they should be comma separated. "
-        ),
+               "You will receive a user's message describing the subject(s) they teach. "
+               "Your task is to extract the subject(s) from the message and respond **only** in the exact JSON format below. "
+               "If the subject(s) is or are present, return it and set 'Present' to 'Yes'. "
+               "If no subject(s) is or are provided, set 'Subject(s)' to Null and 'Present' to 'No'. "
+               "Do not add extra text or explanation."
+        ),  
         
         "prompt": (
             "{{\n"
-            '  "Subject(s)": "<extracted_subject(s)>"\n'
+            '  "Subject(s)": "<extracted_subject(s)_or_null>",\n'
+            '  "Present": "<Yes_or_No>"\n'
             "}}\n"
         )
     },
@@ -142,16 +161,19 @@ EDUCATOR_FLOW = {
     },
     
     
-    "GET_AGE_GROUP": {     # 11
+    "GET_AGE_GROUP": {     # 11    
         "system_instruction": (
-            "You will be given a user's message describing the age group they teach. "
-            "Only extract the age group from the message and return it strictly in the following JSON format and do not include anything else. "
-            "If multiple age groups are described, they should be comma separated. "
-        ),
+               "You will receive a user's message describing the age group they teach. "
+               "Your task is to extract the age group from the message and respond **only** in the exact JSON format below. "
+               "If the age group is present, return it and set 'Present' to 'Yes'. "
+               "If no age group is provided, set 'Age_group' to Null and 'Present' to 'No'. "
+               "Do not add extra text or explanation."
+        ),  
         
         "prompt": (
             "{{\n"
-            '  "Age_group": "<age_group>"\n'
+            '  "Age_group": "<extracted_age_group_or_null>",\n'
+            '  "Present": "<Yes_or_No>"\n'
             "}}\n"
         )
     },
@@ -169,14 +191,17 @@ EDUCATOR_FLOW = {
     
     "GET_INITIATIVE": {    # 13
         "system_instruction": (
-            "You will be given a user's message describing initiatives they would like to learn more about "
-            "Only initiatives from the message and return it strictly in the following JSON format, "
-            "and do not include anything else."
-        ),
+               "You will receive a user's message describing initiatives they would like to learn more about. "
+               "Your task is to extract the initiatives from the message and respond **only** in the exact JSON format below. "
+               "If the initiatives is or are present, return it and set 'Present' to 'Yes'. "
+               "If no initiatives is or are provided, set 'Initiatives' to Null and 'Present' to 'No'. "
+               "Do not add extra text or explanation."
+        ),  
         
         "prompt": (
             "{{\n"
-            '  "Initiatives": "<extracted_initiatives>"\n'
+            '  "Initiatives": "<extracted_initiatives_or_null>",\n'
+            '  "Present": "<Yes_or_No>"\n'
             "}}\n"
         )
     },
@@ -192,22 +217,25 @@ EDUCATOR_FLOW = {
     },
     
     
-    "GET_INVOLVMENT_BEFORE": {       # 15
+    "GET_INVOLVEMENT_BEFORE": {       # 15
         "system_instruction": (
-            "You will be given a user's message describing if they had involved in the Earth Prize before or not? "
-            "Extract the answer in Yes or No only and return the response strictly in the following JSON format "
-            "and do not include anything else:"
-        ),
+            "You will receive a user's message describing whether they have been involved in the Earth Prize before. "
+            "Your task is to extract a clear Yes or No answer from the message and respond **only** in the exact JSON format below. "
+            "If an answer is provided, set 'Involvement_before' to 'Yes' or 'No' accordingly, and set 'Present' to 'Yes'. "
+            "If the user does not provide a clear answer, set 'Involvement_before' to Null and 'Present' to 'No'. "
+            "Return only JSON, no extra text or explanation."
+        ),  
         
         "prompt": (
             "{{\n"
-            '  "Involvment_before": "<Yes or NO>"\n'
+            '  "Involvement_before": "<Yes_or_No_or_null>",\n'
+            '  "Present": "<Yes_or_No>"\n'
             "}}\n"
         )
     },
     
     
-    "NO_INVOLVMENT": {     # 16
+    "NO_INVOLVEMENT": {     # 16
         "system_instruction": (
                 "Now greet user as following and ask them if they would like to learn more about The Earth Prize?? "
                 "Respond strictly according to the following prompt in plain text:"
@@ -216,7 +244,7 @@ EDUCATOR_FLOW = {
         "prompt": "Welcome! You are now going to be part of a community of changemakers! Would you like to learn more about The Earth Prize??",
     },
     
-    "YES_INVOLVMENT": {    # 17
+    "YES_INVOLVEMENT": {    # 17
         "system_instruction": (
                 "Now greet user and respond with the following information and ask them if they would like to learn more about The Earth Prize?? "
                 "Respond strictly according to the following prompt in plain text:"
@@ -228,19 +256,20 @@ EDUCATOR_FLOW = {
     
     "GET_ANY_FURTHER_QUERY": {   # 18
         "system_instruction": (
-            "You will be given a user's message describing if they have any query or not? "
-            "Extract their query along with Yes only if they have query and No only if they don't have any query and only return the response strictly in the following JSON format "
-            "and do not include anything else:"
+            "You will receive a user's message indicating whether they have a further query. "
+            "If the user has a query, extract the query text, set 'Is_Query' to 'Yes', and place the extracted text in 'Query'. "
+            "If the user does not have a query, set 'Query' to Null and 'Is_Query' to 'No'. "
+            "Return the output strictly in the following JSON format without any extra text or explanation:"
         ),
         
         "prompt": (
             "{{\n"
-            '  "Query": "<query>"\n'
-            '  "Is_Query": "<Yes or No>"\n'
+            '  "Query": "<query_or_null>",\n'
+            '  "Is_Query": "<Yes_or_No>"\n'
             "}}\n"
         )
     },
-    
+
     
     "LAST_GREET_USER": {    # 19
         "system_instruction": (
