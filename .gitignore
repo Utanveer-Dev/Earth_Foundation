@@ -38,3 +38,4 @@ Thumbs.db
 # Project specific
 # =================
 faiss_index/
+faiss_faq_index/
