@@ -96,6 +96,8 @@ class StoryCreativityAPIView(APIView):
                 "age_group": age_group,
                 "initiative": initiative,
                 "worked_before": worked_before,
+                "query": None,
+                "is_query": None,
                 "date_of_birth": date_of_birth,
                 "in_full_time_secondary_school": in_full_time_secondary_school,
                 "joining_again": joining_again,

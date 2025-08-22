@@ -104,6 +104,13 @@ class StoryCreativityChain:
 
         self.retriever = self.db.as_retriever()
 
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        faqs_faiss_path = os.path.join(current_dir, "faiss_faq_index")
+
+        self.db_faqs = FAISS.load_local(faqs_faiss_path, HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2"), allow_dangerous_deserialization=True)
+
+        self.faq_retriever = self.db_faqs.as_retriever()
+
     def get_retriever_simple(self):
         return self.retriever
 
@@ -190,6 +197,9 @@ class StoryCreativityChain:
         
         return retriever
 
+    
+    def get_faq_retriever(self):
+        return self.faq_retriever
 
     def get_flow_step(self, index: int, FLOW_LIST):
         """Return the prompt and system instruction for a given index."""

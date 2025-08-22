@@ -27,6 +27,8 @@ class StoryState(TypedDict):
     age_group: Optional[str]
     initiative: Optional[str]
     worked_before: Optional[str]
+    query: Optional[str]
+    is_query: Optional[str]
     date_of_birth: Optional[str]
     in_full_time_secondary_school: Optional[str]
     joining_again: Optional[str]
@@ -172,7 +174,7 @@ def extract_data_from_index(state: StoryState):
     #-------------------------------------------------------- EDUCATOR ROLE EXTRACTION ------------------------------
     elif state["role"] == "educator":
     
-        if state["index"] == 1 or state["index"] == 3 or state["index"] == 5 or state["index"] == 7 or state["index"] == 9 or state["index"] == 11 or state["index"] == 13 or state["index"] == 15:
+        if state["index"] == 1 or state["index"] == 3 or state["index"] == 5 or state["index"] == 7 or state["index"] == 9 or state["index"] == 11 or state["index"] == 13 or state["index"] == 15 or state["index"] == 18:
             
             EDUCATOR_FLOW_LIST = list(EDUCATOR_FLOW.values())
             
@@ -265,6 +267,22 @@ def extract_data_from_index(state: StoryState):
                         else:
                             state["worked_before"] = data["Involvement_before"]
                             state["index"] += 1
+                            
+                            
+                    elif state["index"] == 18 and "Query" in data:
+                        if is_invalid(data["Query"], data["Is_Query"]):
+                            # if state["worked_before"] in ["NO", "No", "no"]:
+                            #     state["index"] -= 2
+                            # else:
+                            #     state["index"] -= 1
+                            state["query"] = data["Query"]
+                            state["is_query"] = data["Is_Query"]
+                            
+                            state["index"] += 1
+                        else:
+                            state["query"] = data["Query"]
+                            state["is_query"] = data["Is_Query"]
+                            # state["index"] += 1
 
 
                 except json.JSONDecodeError:
@@ -556,6 +574,51 @@ def llm_no_retrieval(state: StoryState):
         print("")
         
         state["index"] += 1
+        
+    
+    #------------------------------------------- EDUCATOR ROLE -----------------------------------------------
+    elif state["role"] == "educator" and state["index"] == 18 and (state["is_query"] in ["YES", "Yes", "yes"]): 
+        
+        # state["index"] -= 1
+        
+        system_instruction = """You would be given a question from a user regarding FAQs of Earth Prize Foundation.
+        Respond according to the context provided."""
+        
+        B_INST, E_INST = "[INST]", "[/INST]"
+        B_SYS, E_SYS = "<<SYS>>\n", "\n<</SYS>>\n\n"
+        SYSTEM_PROMPT1 = B_SYS + system_instruction + E_SYS
+
+        instruction = """
+        History: {history} \n
+        Context: {context} \n
+        User: {question}"""
+
+        prompt_template = B_INST + SYSTEM_PROMPT1 + instruction + E_INST
+        
+        # prompt_template = system_prompt + instruction
+        
+        prompt = PromptTemplate(input_variables=["history", "question", "context"], template=prompt_template)
+        
+        llm_chain.prompt = prompt
+
+        faq_retriever = story_chain.get_faq_retriever()
+
+        temp_chain = (
+            {"context": faq_retriever, "question": RunnablePassthrough()}
+            | llm_chain
+        )
+
+        response = temp_chain.invoke(state["question"])
+        
+        text_response = response.get("text", "").strip()
+
+        # Store plain answer
+        state["answer"] = text_response    
+
+        print("")
+        print("State:  ", state)
+        print("")
+    
         
     #------------------------------------------- TEENAGER ROLE -----------------------------------------------
     elif state["role"] == "teenager" and state["index"] == 12 and (state["joining_again"] in ["YES", "Yes", "yes"]): 
