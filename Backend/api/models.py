@@ -5,7 +5,7 @@ class Customer(models.Model):
     ROLE_CHOICES = [ 
                     ("teenager", "Teenager"), 
                     ("educator", "Educator"), 
-                    ("adult", "Adult") ] 
+                    ("adult", "Adult") ]  
     
     name = models.CharField(max_length=100, blank=True, null=True) 
     email = models.CharField(max_length=100, blank=True, null=True) 
