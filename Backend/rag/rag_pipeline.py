@@ -24,11 +24,14 @@ from role_states.adult_states import ADULT_FLOW
 from role_states.educator_states import EDUCATOR_FLOW
 
 import google.generativeai as genai
-
+from dotenv import load_dotenv
 from .data_processor import SchoolDataProcessor
 import json
 import re
 
+load_dotenv()
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 class CustomOutputParser(StrOutputParser):
     def parse(self, response: str):
@@ -62,7 +65,7 @@ class StoryCreativityChain:
         
         self.llm = ChatGoogleGenerativeAI(
             model="gemini-2.0-flash", 
-            google_api_key="AIzaSyCccg0ff4vPLA0hdw7sFPNrNV5vcTcVIO4",
+            google_api_key=GEMINI_API_KEY,
             temperature=0.7,
             top_k=40,
             top_p=0.95,
@@ -106,7 +109,7 @@ class StoryCreativityChain:
 
     def get_retriever(self, query):
         
-        genai.configure(api_key="AIzaSyCccg0ff4vPLA0hdw7sFPNrNV5vcTcVIO4")        
+        genai.configure(api_key=GEMINI_API_KEY)        
         
         model = genai.GenerativeModel(
             model_name="gemini-2.0-flash"
