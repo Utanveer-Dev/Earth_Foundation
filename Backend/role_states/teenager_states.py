@@ -78,19 +78,21 @@ TEENAGER_FLOW = {
     },
     
     
-    "GET_EMAIL": {    # 5   
+    "GET_EMAIL": {    # 5
         "system_instruction": (
-               "You will receive a user's message containing their email. "
-               "Your task is to extract the email and respond **only** in the exact JSON format below. "
-               "If the email is present, return it and set 'Present' to 'Yes'. "
-               "If no email is provided, set 'Email' to Null and 'Present' to 'No'. "
-               "Do not add extra text or explanation."
+            "You will receive a user's message containing their email. "
+            "Your task is to extract the email only if it is provided and in a valid format "
+            "(must contain '@' and a domain such as .com, .net, .org, etc.). "
+            "If a valid email is provided, return it and set 'Format' to 'Valid'. "
+            "If no email is given or the format is wrong, set 'Email' to Null and 'Format' to 'Invalid'. "
+            "Strictly respond only in the exact JSON format below. "
+            "Do not add any extra text, explanation, or comments."
         ),  
         
         "prompt": (
             "{{\n"
             '  "Email": "<extracted_email_or_null>",\n'
-            '  "Present": "<Yes_or_No>"\n'
+            '  "Format": "<Valid_or_Invalid>"\n'
             "}}\n"
         )
     },

@@ -329,35 +329,112 @@ def extract_query_entities(query: str) -> Dict[str, Optional[str]]:
 
 def retrieve(db, query: str, k: int = 10) -> List[Document]:
     """Convenience: run the retrieval with entity-based filtering + graceful fallback."""
-    entities = extract_query_entities(query)  # {"year": ..., "country": ..., "school": ...}
+    # entities = extract_query_entities(query)  # {"year": ..., "country": ..., "school": ...}
 
+    # kwargs = {"k": k, "fetch_k": max(50, k * 5)}
+
+    # print("Model's entities: ", entities)
+
+    # # Build filter dict dynamically from available entities
+    # filter_kwargs = {}
+    # if entities.get("year"):
+    #     filter_kwargs["year"] = entities["year"]
+    # if entities.get("country"):
+    #     filter_kwargs["country"] = entities["country"]
+    # if entities.get("school_name"):
+    #     filter_kwargs["school_name"] = entities["school_name"]
+
+    # if filter_kwargs:
+    #     kwargs["filter"] = filter_kwargs
+
+    # # primary: filtered search
+    # docs = db.as_retriever(search_type="similarity", search_kwargs=kwargs) \
+    #             .get_relevant_documents(query)
+
+    # # fallback: if nothing found with filter, drop the filter
+    # if not docs and filter_kwargs:
+    #     docs = db.as_retriever(search_type="similarity",
+    #                            search_kwargs={"k": k, "fetch_k": max(50, k * 5)}) \
+    #                 .get_relevant_documents(query)
+    
+    prompt = f"""
+        Extract the following entities from the user query strictly in JSON format:
+        - country (if present)
+        - year (only 2022–2025 if present)
+
+        Also make sure if country in query is United States, you should add it as: "USA"
+
+        Query: "{query}"
+
+        Output only JSON strictly in this format:
+        {{
+        "country": "<country or null>",
+        "year": "<year or null>"
+        }}
+        """
+
+    response = model.generate_content(
+        prompt,
+        generation_config={
+            "temperature": 0.1,
+            "max_output_tokens": 200,
+            "top_p": 0.8,
+            "top_k": 40
+        }
+    )
+
+    try:
+        text = response.text.strip()
+
+        # Step 2: Extract JSON substring using regex (handles cases with extra text)
+        match = re.search(r"\{.*\}", text, re.DOTALL)
+        if match:
+            text = match.group(0)
+
+        # Step 3: Try loading JSON
+        entities = json.loads(text)
+        
+        print("Model's result: ", entities)
+        
+    except Exception:
+        # Fallback if Gemini returns something unexpected
+        entities = {"country": None, "year": None}
+        
+    k = 10
+        
     kwargs = {"k": k, "fetch_k": max(50, k * 5)}
 
     print("Model's entities: ", entities)
 
     # Build filter dict dynamically from available entities
     filter_kwargs = {}
-    if entities.get("year"):
-        filter_kwargs["year"] = entities["year"]
+    
+    filter_kwargs["year"] = "2024"  # Hardcoded to 2024 for count retrieval
+    
     if entities.get("country"):
         filter_kwargs["country"] = entities["country"]
-    if entities.get("school_name"):
-        filter_kwargs["school_name"] = entities["school_name"]
-
+        
+    # filter_kwargs["total_schools_in_country"] = "total_schools_in_country"
+    # filter_kwargs["school_count"] = "school_count"
+        
     if filter_kwargs:
         kwargs["filter"] = filter_kwargs
 
+    print("")
+    print("--------------------------------Kwargs:", kwargs)
+    print("")
+
     # primary: filtered search
-    docs = db.as_retriever(search_type="similarity", search_kwargs=kwargs) \
-                .get_relevant_documents(query)
+    retriever = db.as_retriever(search_type="similarity", search_kwargs=kwargs)
+
+    docs = retriever.get_relevant_documents(query)
 
     # fallback: if nothing found with filter, drop the filter
     if not docs and filter_kwargs:
-        docs = db.as_retriever(search_type="similarity",
-                               search_kwargs={"k": k, "fetch_k": max(50, k * 5)}) \
-                    .get_relevant_documents(query)
-
-    return docs
+        retriever = db.as_retriever(search_type="similarity",
+                            search_kwargs={"k": k, "fetch_k": max(50, k * 5)})
+    
+    return retriever.get_relevant_documents(query)
     
 
 # Updated method for your StoryCreativityChain class
@@ -408,11 +485,12 @@ def test_retrieval(db: FAISS, test_queries: List[str]):
 
 # Test queries for your use case
 TEST_QUERIES = [
-    "Which schools were in Pakistan in year 2024",
-    "schools in USA in year 2022",
-    "year 2023 schools data",
-    "educational institutions in Canada in 2022",
-    "recent school data of year 2025"
+    # "Which schools were in Pakistan in year 2024",
+    # "schools in USA in year 2022",
+    # "year 2023 schools data",
+    # "educational institutions in Canada in 2022",
+    # "recent school data of year 2025"
+    "Pakistan"
 ]
 
 

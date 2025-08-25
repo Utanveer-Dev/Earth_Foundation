@@ -32,6 +32,11 @@ import re
 load_dotenv()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+genai.configure(api_key=GEMINI_API_KEY)        
+        
+model = genai.GenerativeModel(
+    model_name="gemini-2.0-flash"
+)
 
 class CustomOutputParser(StrOutputParser):
     def parse(self, response: str):
@@ -116,12 +121,6 @@ class StoryCreativityChain:
 
     def get_retriever(self, query):
         
-        genai.configure(api_key=GEMINI_API_KEY)        
-        
-        model = genai.GenerativeModel(
-            model_name="gemini-2.0-flash"
-        )
-        
         prompt = f"""
         Extract the following entities from the user query strictly in JSON format:
         - country (if present)
@@ -197,6 +196,84 @@ class StoryCreativityChain:
         
         return retriever
 
+    def get_count_retriever(self, query):
+        
+        prompt = f"""
+        Extract the following entities from the user query strictly in JSON format:
+        - country (if present)
+        - year (only 2022–2025 if present)
+
+        Also make sure if country in query is United States, you should add it as: "USA"
+
+        Query: "{query}"
+
+        Output only JSON strictly in this format:
+        {{
+        "country": "<country or null>",
+        "year": "<year or null>"
+        }}
+        """
+
+        response = model.generate_content(
+            prompt,
+            generation_config={
+                "temperature": 0.1,
+                "max_output_tokens": 200,
+                "top_p": 0.8,
+                "top_k": 40
+            }
+        )
+
+        try:
+            text = response.text.strip()
+
+            # Step 2: Extract JSON substring using regex (handles cases with extra text)
+            match = re.search(r"\{.*\}", text, re.DOTALL)
+            if match:
+                text = match.group(0)
+
+            # Step 3: Try loading JSON
+            entities = json.loads(text)
+            
+            print("Model's result: ", entities)
+            
+        except Exception:
+            # Fallback if Gemini returns something unexpected
+            entities = {"country": None, "year": None}
+            
+        k = 10
+            
+        kwargs = {"k": k, "fetch_k": max(50, k * 5)}
+
+        print("Model's entities: ", entities)
+
+        # Build filter dict dynamically from available entities
+        filter_kwargs = {}
+        
+        filter_kwargs["year"] = "2024"  # Hardcoded to 2024 for count retrieval
+        
+        if entities.get("country"):
+            filter_kwargs["country"] = entities["country"]
+            
+        if filter_kwargs:
+            kwargs["filter"] = filter_kwargs
+
+        print("")
+        print("--------------------------------Kwargs:", kwargs)
+        print("")
+
+        # primary: filtered search
+        retriever = self.db.as_retriever(search_type="similarity", search_kwargs=kwargs)
+
+        docs = retriever.get_relevant_documents(query)
+ 
+        # fallback: if nothing found with filter, drop the filter
+        if not docs and filter_kwargs:
+            retriever = self.db.as_retriever(search_type="similarity",
+                                search_kwargs={"k": k, "fetch_k": max(50, k * 5)})
+        
+        return retriever        
+
     
     def get_faq_retriever(self):
         return self.faq_retriever
@@ -217,20 +294,44 @@ class StoryCreativityChain:
 
         system_instruction, prompt = self.get_flow_step(index, FLOW_LIST)
         
-        # system_prompt = "Instruction: " + instruction + "\n" + prompt
+        # # system_prompt = "Instruction: " + instruction + "\n" + prompt
         
-        B_INST, E_INST = "[INST]", "[/INST]"
-        B_SYS, E_SYS = "<<SYS>>\n", "\n<</SYS>>\n\n"
-        SYSTEM_PROMPT1 = B_SYS + system_instruction + '\n' + prompt + E_SYS
+        # B_INST, E_INST = "[INST]", "[/INST]"
+        # B_SYS, E_SYS = "<<SYS>>\n", "\n<</SYS>>\n\n"
+        # SYSTEM_PROMPT1 = B_SYS + system_instruction + '\n' + prompt + E_SYS
+
+        # instruction = """
+        # History: {history} \n
+        # Context: {context} \n
+        # User: {question}"""
+
+        # prompt_template = B_INST + SYSTEM_PROMPT1 + instruction + E_INST
+        
+        prompt = f"""
+                <System_Instruction>
+                {system_instruction}
+                {prompt}
+                </System_Instruction>
+                
+                """
 
         instruction = """
-        History: {history} \n
-        Context: {context} \n
-        User: {question}"""
+            <Conversation_History> 
+            {history}
+            </Conversation_History>
 
-        prompt_template = B_INST + SYSTEM_PROMPT1 + instruction + E_INST
-        
-        # prompt_template = system_prompt + instruction
+            <Context>
+            {context}
+            </Context>
+            
+            <User_Question>
+            {question}
+            </User_Question>
+
+            Your Response:
+        """
+
+        prompt_template = prompt + instruction
         
         prompt = PromptTemplate(input_variables=["history", "question", "context"], template=prompt_template)
 
