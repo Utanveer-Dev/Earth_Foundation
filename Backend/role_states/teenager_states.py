@@ -1,10 +1,21 @@
 
+REPITITION_HANDLING = (
+            "Before asking the current question, carefully review the conversation history. "
+            "If this question has already been asked before but was not answered or the information was "
+            "not provided in correct format by the user, "
+            "rephrase or adapt it in a natural way to politely ask again. "
+            "If the user has already provided the information, acknowledge it briefly and move forward" 
+            "instead of asking the same question again. "
+            "Always adapt dynamically to avoid sounding repetitive."
+        )
+
 TEENAGER_FLOW = {
     
     "INTRO": {
         "system_instruction": (  # 0
                 "You are a friendly and engaging AI assistant. Your goal is to guide the user through a series of questions to learn more about them."
-                "Maintain a warm and welcoming tone throughout the conversation."
+                "Maintain a warm and welcoming tone throughout the conversation. "
+                f"{REPITITION_HANDLING}"
                 "Respond according to the following prompt:"
         ),                                    
              
@@ -36,7 +47,8 @@ TEENAGER_FLOW = {
     
     "ASK_DOB": {          # 2
         "system_instruction": (
-                "Now ask the user about their date of birth."
+                "Now ask the user about their date of birth. "
+                f"{REPITITION_HANDLING}"
                 "Respond strictly according to the following prompt in plain text:"
         ),
         
@@ -67,7 +79,8 @@ TEENAGER_FLOW = {
     
     "ASK_EMAIL": {          # 4
         "system_instruction": (
-                "Now greet the user as following and ask them about their email."
+                "Now greet the user as following and ask them about their email. "
+                f"{REPITITION_HANDLING}"
                 "Respond strictly according to the following prompt in plain text:"
         ),
         
@@ -100,7 +113,8 @@ TEENAGER_FLOW = {
     
     "ASK_SCHOOL_SETTING": {   # 6
         "system_instruction": (
-                "Now ask the user if they're in full-time secondary school?"
+                "Now ask the user if they're in full-time secondary school? "
+                f"{REPITITION_HANDLING}"
                 "Respond strictly according to the following prompt in plain text:"
         ),  
         
@@ -132,6 +146,7 @@ TEENAGER_FLOW = {
     "ASK_COUNTRY": {                # 8
         "system_instruction": (
                 "Now greet the user as following and ask them from which country they're joining from? "
+                f"{REPITITION_HANDLING}"
                 "Respond strictly according to the following prompt in plain text:"
         ),
         
@@ -160,6 +175,7 @@ TEENAGER_FLOW = {
     "GREET_USER_AND_ASK_JOINING_INFO": {   # 10
         "system_instruction": (
                 "Now greet the user as following and ask them if they're joining us again or is this their first time? "
+                f"{REPITITION_HANDLING}"
                 "Respond strictly according to the following prompt named First Prompt in plain text if context contains data from {country} and also extract total number of schools in that country: or "
                 "Respond strictly according to the following prompt named Second Prompt in plain text if context does not contain data from {country}:"
         ),  
@@ -195,6 +211,7 @@ TEENAGER_FLOW = {
                 "Now respond with the following information and ask user what excites them the " 
                 "most right now? Options for this would be given to the user by default and you " 
                 "should not give any option by yourself. "
+                f"{REPITITION_HANDLING}"
                 "Respond strictly according to the following prompt in plain text:"
         ),  
         
@@ -209,6 +226,7 @@ TEENAGER_FLOW = {
     "JOINING_AGAIN_GREET_AND_ASK_TEAM_FORMED": {     # 13
         "system_instruction": (
                 "Now respond with the following information and ask user if they have formed a team or not? "
+                f"{REPITITION_HANDLING}"
                 "Respond strictly according to the following prompt in plain text:"
         ),  
         
@@ -242,6 +260,7 @@ TEENAGER_FLOW = {
     "ASK_MOTIVATION_STATEMENT": {              # 15
         "system_instruction": (
                 "Now ask user if they have submitted their motivation statement? "
+                f"{REPITITION_HANDLING}"
                 "Respond strictly according to the following prompt in plain text:"
         ),  
         
@@ -270,6 +289,7 @@ TEENAGER_FLOW = {
     "ASK_SOLUTION_COMPLETE": {         # 17
         "system_instruction": (
                 "Now ask user if they have completed their solution? "
+                f"{REPITITION_HANDLING}"
                 "Respond strictly according to the following prompt in plain text:"
         ),  
         
@@ -298,6 +318,7 @@ TEENAGER_FLOW = {
     "ASK_EXCITE_STATEMENT": {             # 19
         "system_instruction": (
                 "Now ask user what excites them the most right now? Options for this would be given to the user by default and you should not give any option by yourself. "
+                f"{REPITITION_HANDLING}"
                 "Respond strictly according to the following prompt in plain text:"
         ),  
         

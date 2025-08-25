@@ -1,10 +1,22 @@
 
+REPITITION_HANDLING = (
+            "Before asking the current question, carefully review the conversation history. "
+            "If this question has already been asked before but was not answered or the information was "
+            "not provided in correct format by the user, "
+            "rephrase or adapt it in a natural way to politely ask again. "
+            "If the user has already provided the information, acknowledge it briefly and move forward" 
+            "instead of asking the same question again. "
+            "Always adapt dynamically to avoid sounding repetitive."
+        )
+
+
 EDUCATOR_FLOW = {
     
     "INTRO": {
         "system_instruction": (  # 0
                 "You are a friendly and engaging AI assistant. Your goal is to guide the user through a series of questions to learn more about them."
                 "Maintain a warm and welcoming tone throughout the conversation."
+                f"{REPITITION_HANDLING}"
                 "Respond according to the following prompt:"
         ),                                    
              
@@ -38,6 +50,7 @@ EDUCATOR_FLOW = {
     "ASK_EMAIL": {          # 2
         "system_instruction": (
                 "Now ask the user about their email."
+                f"{REPITITION_HANDLING}"
                 "Respond strictly according to the following prompt in plain text:"
         ),
         
@@ -68,6 +81,7 @@ EDUCATOR_FLOW = {
     "ASK_COUNTRY": {                # 4
         "system_instruction": (
                 "Now ask the user about the country in which they're teaching."
+                f"{REPITITION_HANDLING}"
                 "Respond strictly according to the following prompt in plain text:"
         ),
         
@@ -96,6 +110,7 @@ EDUCATOR_FLOW = {
     "GREET_USER_AND_ASK_EDUCATION_SETTING": {   # 6
         "system_instruction": (
                 "Now greet the user as following and ask them where do they teach."
+                f"{REPITITION_HANDLING}"
                 "Respond strictly according to the following prompt named First Prompt in plain text if context contains data from {country}: or "
                 "Respond strictly according to the following prompt named Second Prompt in plain text if context does not contain data from {country}:"
         ),  
@@ -128,6 +143,7 @@ EDUCATOR_FLOW = {
     "ASK_SUBJECT(S)": {     # 8
         "system_instruction": (
                 "Now ask user that what subject(s) do you teach? "
+                f"{REPITITION_HANDLING}"
                 "Respond strictly according to the following prompt in plain text:"
         ),  
         
@@ -156,6 +172,7 @@ EDUCATOR_FLOW = {
     "ASK_AGE_GROUP": {              # 10
         "system_instruction": (
                 "Now ask user that what age group do they teach? "
+                f"{REPITITION_HANDLING}"
                 "Respond strictly according to the following prompt in plain text:"
         ),  
         
@@ -184,6 +201,7 @@ EDUCATOR_FLOW = {
     "ASK_INITIATIVE": {                             # 12
         "system_instruction": (
                 "Now ask user about the initiatives they would like to learn more about. Options for initiatives would be given to the user by default and you should not give any option by yourself. "
+                f"{REPITITION_HANDLING}"
                 "Respond strictly according to the following prompt in plain text:"
         ),  
         
@@ -212,6 +230,7 @@ EDUCATOR_FLOW = {
     "GREET_USER_AND_ASK_INVOLVEMENT": {                 # 14
         "system_instruction": (
                 "Now greet user as following and ask them if they had involved in the Earth Prize before? "
+                f"{REPITITION_HANDLING}"
                 "Respond strictly according to the following prompt in plain text:"
         ),  
         

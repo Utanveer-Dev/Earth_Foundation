@@ -1,5 +1,5 @@
 "use client";
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, KeyboardEvent } from "react";
 
 export default function Home() {
   const [role, setRole] = useState<string>("Teenager");
@@ -9,6 +9,7 @@ export default function Home() {
 
   const handleAsk = async (e: FormEvent) => {
     e.preventDefault();
+    if (!question.trim()) return; // prevent empty submit
     setLoading(true);
     setAnswer("");
 
@@ -31,6 +32,17 @@ export default function Home() {
       setAnswer(`Error: ${err.message}`);
     }
     setLoading(false);
+  };
+
+  // Handle Enter key inside textarea
+  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault(); // prevent new line
+      const form = e.currentTarget.form;
+      if (form) {
+        form.requestSubmit(); // triggers onSubmit
+      }
+    }
   };
 
   return (
@@ -57,6 +69,7 @@ export default function Home() {
           placeholder="Type your question here..."
           rows={4}
           cols={50}
+          onKeyDown={handleKeyDown} // 👈 handle Enter
           style={{ padding: "0.5rem" }}
         />
         <br />
